@@ -97,10 +97,10 @@ func main() {
 
 }
 
-func usage() {
+/*func usage() {
 	fmt.Printf("%s\n", usageStr)
 	os.Exit(0)
-}
+}*/
 
 func history(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
@@ -114,18 +114,17 @@ func history(cmd *cobra.Command, args []string) {
 	ec, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	defer ec.Close()
 	commandCh := make(chan *command)
-	ec.BindRecvChan("commands", commandCh)
+	ec.BindSendChan("commands", commandCh)
 	responseCh := make(chan *response)
-	ec.BindSendChan("responses", responseCh)
+	ec.BindRecvChan("responses", responseCh)
 
-	// launch a goroutine to fetch commands (they arrive via netchan)
-	// we use wg.Add(1) to add to the waitgroup so we can wait for all goroutines to end
-	// it obviously exits if we explicitly call os.exit
-	wg.Add(1)
-	go listenAndReply(commandCh, responseCh)
+	log.Notice("history: sending NATS test message")
+
+	commandCh <- &command{"Me", "Test", "args"}
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)
+	wg.Add(1)
 	wg.Wait()
 }
 

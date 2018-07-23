@@ -4,6 +4,7 @@ import (
 	_ "flag"
 	"fmt"
 	gnatsd "github.com/nats-io/gnatsd/server"
+	"github.com/nats-io/nats"
 	"github.com/op/go-logging"
 	"github.com/spf13/cobra"
 	"os"
@@ -32,6 +33,13 @@ func init() {
 }
 
 func main() {
+
+	// handle ^c (os.Interrupt)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGTERM)
+	go cleanup(c)
+
 	var echoTimes int
 
 	var cmdDaemonize = &cobra.Command{
@@ -50,6 +58,14 @@ func main() {
 		Run:   daemonize,
 	}
 
+	var cmdHistory = &cobra.Command{
+		Use:   "history",
+		Short: "Get the sherpa collected history",
+		Long:  "Sherpa gets history from all the sources available. This commands let you walk in the history.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   history,
+	}
+
 	var cmdEcho = &cobra.Command{
 		Use:   "echo [string to echo]",
 		Short: "Echo anything to the screen",
@@ -63,9 +79,8 @@ func main() {
 	var cmdTimes = &cobra.Command{
 		Use:   "times [# times] [string to echo]",
 		Short: "Echo anything to the screen more times",
-		Long: `echo things multiple times back to the user by providing
-a count and a string.`,
-		Args: cobra.MinimumNArgs(1),
+		Long:  "echo things multiple times back to the user by providing a count and a string.",
+		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			for i := 0; i < echoTimes; i++ {
 				fmt.Println("Echo: " + strings.Join(args, " "))
@@ -76,7 +91,7 @@ a count and a string.`,
 	cmdTimes.Flags().IntVarP(&echoTimes, "times", "t", 1, "times to echo the input")
 
 	var rootCmd = &cobra.Command{Use: "app"}
-	rootCmd.AddCommand(cmdPrint, cmdEcho, cmdDaemonize)
+	rootCmd.AddCommand(cmdPrint, cmdEcho, cmdHistory, cmdDaemonize)
 	cmdEcho.AddCommand(cmdTimes)
 	rootCmd.Execute()
 
@@ -87,53 +102,70 @@ func usage() {
 	os.Exit(0)
 }
 
+func history(cmd *cobra.Command, args []string) {
+	//var args_empty = []string{""}
+
+	fmt.Print("reached history\n")
+
+	// NATS client, used in daemon mode
+	// create NATS netchan (these are native go channels binded to NATS send/receive)
+	// following go idiom: "don't communicate by sharing, share by communicating"
+	nc, _ := nats.Connect(nats.DefaultURL)
+	ec, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
+	defer ec.Close()
+	commandCh := make(chan *command)
+	ec.BindRecvChan("commands", commandCh)
+	responseCh := make(chan *response)
+	ec.BindSendChan("responses", responseCh)
+
+	// launch a goroutine to fetch commands (they arrive via netchan)
+	// we use wg.Add(1) to add to the waitgroup so we can wait for all goroutines to end
+	// it obviously exits if we explicitly call os.exit
+	wg.Add(1)
+	go listenAndReply(commandCh, responseCh)
+
+	// wait for all the goroutines to end before exiting
+	// (should never exit) (exit only with signal.interrupt)
+	wg.Wait()
+}
+
 func daemonize(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
 
 	fmt.Print("reached daemonize\n")
 
-	// handle ^c (os.Interrupt)
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
-	go cleanup(c)
+	// embedded NATS server
+	{
+		// Create the gntsd with default options (empty type)
+		var opts = gnatsd.Options{}
+		s := gnatsd.New(&opts)
 
-	//fmt.Println("Args: " + strings.Join(args, " "))
+		// Configure the logger based on the flags
+		s.ConfigureLogger()
 
-	/*// Create a FlagSet and sets the usage
-	fs := flag.NewFlagSet("nats-server", flag.ExitOnError)
-	fs.Usage = usage
-
-	// Configure the options from the flags/config file
-	opts, err := server.ConfigureOptions(fs, args_empty,
-		server.PrintServerAndExit,
-		fs.Usage,
-		server.PrintTLSHelpAndDie)
-	if err != nil {
-		server.PrintAndDie(err.Error() + "\n" + usageStr)
+		//add 1 to the working group and start a goroutine with the NATS server itself
+		wg.Add(1)
+		go gnatsd.Run(s)
 	}
 
+	// NATS client, used in daemon mode
+	// create NATS netchan (these are native go channels binded to NATS send/receive)
+	// following go idiom: "don't communicate by sharing, share by communicating"
+	nc, _ := nats.Connect(nats.DefaultURL)
+	ec, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
+	defer ec.Close()
+	commandCh := make(chan *command)
+	ec.BindRecvChan("commands", commandCh)
+	responseCh := make(chan *response)
+	ec.BindSendChan("responses", responseCh)
 
-	// Configure the options from the flags/config file
-	opts, err = server.ConfigureOptions(fs, args_empty,
-		server.PrintServerAndExit,
-		fs.Usage,
-		server.PrintTLSHelpAndDie)
-	if err != nil {
-		server.PrintAndDie(err.Error() + "\n" + usageStr)
-	}*/
-
-	var opts = gnatsd.Options{}
-
-	// Create the gntsd with appropriate options.
-	s := gnatsd.New(&opts)
-
-	// Configure the logger based on the flags
-	s.ConfigureLogger()
-
-	// Start things up. Block here until done.
+	// launch a goroutine to fetch commands (they arrive via netchan)
+	// we use wg.Add(1) to add to the waitgroup so we can wait for all goroutines to end
+	// it obviously exits if we explicitly call os.exit
 	wg.Add(1)
-	go gnatsd.Run(s)
+	go listenAndReply(commandCh, responseCh)
 
+	// wait for all the goroutines to end before exiting
+	// (should never exit) (exit only with signal.interrupt)
 	wg.Wait()
 }

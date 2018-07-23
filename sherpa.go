@@ -9,8 +9,11 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 )
+
+var wg sync.WaitGroup
 
 var usageStr = "I hope it doesn't explode!"
 
@@ -36,7 +39,7 @@ func main() {
 		Short: "Execute Sherpa server",
 		Long:  "daemonize runs the server component of sherpa, staying in the forefront, if you need it to detach to background, use -b.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   initDaemon,
+		Run:   daemonize,
 	}
 
 	var cmdPrint = &cobra.Command{
@@ -44,7 +47,7 @@ func main() {
 		Short: "Print anything to the screen",
 		Long:  "print is for printing anything back to the screen. For many years people have printed back to the screen.",
 		Args:  cobra.MinimumNArgs(1),
-		Run:   initDaemon,
+		Run:   daemonize,
 	}
 
 	var cmdEcho = &cobra.Command{
@@ -84,10 +87,17 @@ func usage() {
 	os.Exit(0)
 }
 
-func initDaemon(cmd *cobra.Command, args []string) {
+func daemonize(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
 
 	fmt.Print("reached daemonize\n")
+
+	// handle ^c (os.Interrupt)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGTERM)
+	go cleanup(c)
+
 	//fmt.Println("Args: " + strings.Join(args, " "))
 
 	/*// Create a FlagSet and sets the usage
@@ -122,11 +132,8 @@ func initDaemon(cmd *cobra.Command, args []string) {
 	s.ConfigureLogger()
 
 	// Start things up. Block here until done.
+	wg.Add(1)
 	go gnatsd.Run(s)
 
-	// handle ^c (os.Interrupt)
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
-	go cleanup(c)
+	wg.Wait()
 }

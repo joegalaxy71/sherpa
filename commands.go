@@ -8,7 +8,21 @@ import (
 )
 
 func history(cmd *cobra.Command, args []string) {
-	//var args_empty = []string{""}
+
+	//TODO: implement everything
+
+	// INIT PART (SERVER)
+	// * open the history files and read the file into a []string
+
+	// SERVER PART
+	// * subscribe to a specific history channel and listen
+	// * receive partial command string and send back a []string with matching strings
+
+	// CLIENT PART
+	// * enter termbox mode
+	// * get partial commands from user
+	// * display a browseable list of partially matching commands
+	// * allow the user to select one and paste it to the shell prompt
 
 	fmt.Print("reached history\n")
 

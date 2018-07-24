@@ -30,15 +30,15 @@ func init() {
 	backend1Leveled := logging.AddModuleLevel(backend1)
 	backend1Leveled.SetLevel(logging.ERROR, "")
 	logging.SetBackend(backend1Leveled, backend2Formatter)
-}
-
-func main() {
 
 	// handle ^c (os.Interrupt)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
 	go cleanup(c)
+}
+
+func main() {
 
 	var echoTimes int
 
@@ -137,8 +137,6 @@ func daemonize(cmd *cobra.Command, args []string) {
 		// Configure the logger based on the flags
 		s.ConfigureLogger()
 
-		//add 1 to the working group and start a goroutine with the NATS server itself
-		wg.Add(1)
 		go gnatsd.Run(s)
 	}
 

@@ -161,3 +161,5 @@ func daemonize(cmd *cobra.Command, args []string) {
 	// (should never exit) (exit only with signal.interrupt)
 	wg.Wait()
 }
+
+//TODO: refactor sherpa.go into main.go

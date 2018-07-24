@@ -97,11 +97,6 @@ func main() {
 
 }
 
-/*func usage() {
-	fmt.Printf("%s\n", usageStr)
-	os.Exit(0)
-}*/
-
 func history(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "flag"
 	"fmt"
 	"github.com/op/go-logging"
 	"github.com/spf13/cobra"
@@ -92,7 +91,6 @@ func main() {
 	rootCmd.AddCommand(cmdPrint, cmdEcho, cmdHistory, cmdDaemonize)
 	cmdEcho.AddCommand(cmdTimes)
 	rootCmd.Execute()
-
 }
 
 //TODO: refactor main.go into main.go

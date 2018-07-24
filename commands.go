@@ -16,7 +16,7 @@ func history(cmd *cobra.Command, args []string) {
 	// create NATS netchan (these are native go channels binded to NATS send/receive)
 	// following go idiom: "don't communicate by sharing, share by communicating"
 	nc, _ := nats.Connect(nats.DefaultURL)
-	ec, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
+	ec, _ := nats.NewEncodedConn(nc, nats.GOB_ENCODER)
 	defer ec.Close()
 	commandCh := make(chan *command)
 	ec.BindSendChan("commands", commandCh)
@@ -41,6 +41,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 	// embedded NATS server
 	// Create the gntsd with default options (empty type)
 	var opts = gnatsd.Options{}
+	opts.NoSigs = true
 	s := gnatsd.New(&opts)
 
 	// Configure the logger based on the flags
@@ -52,7 +53,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 	// create NATS netchan (these are native go channels binded to NATS send/receive)
 	// following go idiom: "don't communicate by sharing, share by communicating"
 	nc, _ := nats.Connect(nats.DefaultURL)
-	ec, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
+	ec, _ := nats.NewEncodedConn(nc, nats.GOB_ENCODER)
 	defer ec.Close()
 	commandCh := make(chan *command)
 	ec.BindRecvChan("commands", commandCh)

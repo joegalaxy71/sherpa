@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -13,7 +12,7 @@ func cleanup(c chan os.Signal) {
 	os.Exit(1)
 }
 
-func listenAndReply(history_reqCh chan *history_req) {
+/*func listenAndReply(history_reqCh chan *history_req) {
 	defer wg.Done()
 
 	for {
@@ -22,4 +21,4 @@ func listenAndReply(history_reqCh chan *history_req) {
 		fmt.Printf("History request received on channel history_reqCh: Cmd = %s\n", hr.Cmd)
 
 	}
-}
+}*/

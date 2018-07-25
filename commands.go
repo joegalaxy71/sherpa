@@ -88,22 +88,18 @@ func daemonize(cmd *cobra.Command, args []string) {
 	responseCh := make(chan *response)
 	ec.BindSendChan("responses", responseCh)*/
 
-	history_reqCh := make(chan *history_req)
-
 	ec.Subscribe("history", func(subj, reply string, h *history_req) {
 		fmt.Printf("Received an history req on subject %s! %+v\n", subj, h)
 		var hresp history_resp
 		hresp.List = append(hresp.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
 		ec.Publish(reply, hresp)
-
-		//history_reqCh <- h
 	})
 
 	// launch a goroutine to fetch commands (they arrive via netchan)
 	// we use wg.Add(1) to add to the waitgroup so we can wait for all goroutines to end
 	// it obviously exits if we explicitly call os.exit
 	wg.Add(1)
-	go listenAndReply(history_reqCh)
+	//go listenAndReply(history_reqCh)
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/nats-io/nats"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -24,23 +23,14 @@ func history(cmd *cobra.Command, args []string) {
 
 	log.Info("reached history\n")
 
-	// NATS client, used in daemon mode
-	// create NATS netchan (these are native go channels binded to NATS send/receive)
-	// following go idiom: "don't communicate by sharing, share by communicating"
-	nc, _ := nats.Connect(nats.DefaultURL)
-	ec, _ := nats.NewEncodedConn(nc, nats.GOB_ENCODER)
-	defer ec.Close()
-	/*commandCh := make(chan *command)
-	ec.BindSendChan("commands", commandCh)
-	responseCh := make(chan *response)
-	ec.BindRecvChan("responses", responseCh)*/
+	initNATSClient()
 
 	log.Notice("history: sending NATS test message")
 
 	// Requests
 	var hresp historyRes
 	var hreq historyReq
-	hreq.Cmd = "zfs"
+	hreq.Req = "zfs"
 	err := ec.Request("history", hreq, &hresp, 100*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)

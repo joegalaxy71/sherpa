@@ -102,7 +102,7 @@ func cleanup(c chan os.Signal) {
 	// telling all microservers to cleanup before forcibly exiting
 	// Requests
 	/*	var cReq cleanupReq
-		cReq.Cmd = "cleanup"
+		cReq.Req = "cleanup"
 		var cRes cleanupRes
 		err := ec.Request("cleanup", cReq, &cRes, 100*time.Millisecond)
 		if err != nil {

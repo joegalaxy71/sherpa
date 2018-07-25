@@ -13,10 +13,14 @@ func daemonize(cmd *cobra.Command, args []string) {
 
 	// init microservers
 
-	go initHistory()
-	wg.Add(1)
+	//go initHistory()
+	//wg.Add(1)
 
-	go initPrompt()
+	var history microServer
+	history.name = "history"
+	history.run = historyServer
+
+	go initMicroServer(history, historyReq{"ok"}, historyRes{"ok", []string{}})
 	wg.Add(1)
 
 	// init complete
@@ -62,5 +66,48 @@ func initHistory() {
 		})
 }
 
-func initPrompt() {
+func initMicroServer(us microServer, req request, resp response) {
+
+	initNATSClient()
+
+	subscription, err := ec.Subscribe(us.name,
+		func(subj, reply string, req request) {
+			log.Notice("Received a req on channel:%s, subject:%s %+v\n", us.name, subj, req)
+
+			resp = us.run(req)
+
+			ec.Publish(reply, resp)
+			log.Notice("Sent an %s resp back\n", us.name)
+		})
+	if err != nil {
+		log.Error("Unable to contact sherpa server")
+		os.Exit(0)
+	}
+
+	ec.Subscribe("cleanup",
+		func(subj, reply string, c *cleanupReq) {
+			log.Notice("Received an cleanup order on subject %s! %+v\n", subj, c)
+			log.Notice("History subserver: cleanup started\n")
+			subscription.Unsubscribe()
+			log.Notice("History subserver: cleanup completed\n")
+
+		})
+}
+
+func historyServer(req request) response {
+	log.Warning("reached historyServer")
+
+	//type assert request/response
+	hreq, ok := req.(historyReq)
+	log.Notice("Searched: %s", hreq.Req)
+	if ok != true {
+		log.Error("Failed request type assertion")
+	}
+
+	var hres historyRes
+
+	// actual work done
+	hres.List = append(hres.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
+
+	return hres
 }

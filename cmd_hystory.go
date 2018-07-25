@@ -11,10 +11,8 @@ func history(cmd *cobra.Command, args []string) {
 
 	//TODO: implement everything
 
-	// INIT PART (SERVER)
-	// * open the history files and read the file into a []string
-
 	// SERVER PART
+	// * open the history files and read the file into a []string
 	// * subscribe to a specific history channel and listen
 	// * receive partial command string and send back a []string with matching strings
 
@@ -40,10 +38,10 @@ func history(cmd *cobra.Command, args []string) {
 	log.Notice("history: sending NATS test message")
 
 	// Requests
-	var hresp history_resp
-	var hreq history_req
+	var hresp historyRes
+	var hreq historyReq
 	hreq.Cmd = "zfs"
-	err := ec.Request("history", hreq, &hresp, 10*time.Millisecond)
+	err := ec.Request("history", hreq, &hresp, 100*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
@@ -51,8 +49,6 @@ func history(cmd *cobra.Command, args []string) {
 			fmt.Println(hint)
 		}
 	}
-
-	//commandCh <- &command{"Me", "Test", "args"}
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)

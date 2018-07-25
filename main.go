@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/nats-io/nats"
 	"github.com/op/go-logging"
 	"github.com/spf13/cobra"
 	"os"
@@ -9,16 +10,18 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
+// globals
+
 var wg sync.WaitGroup
-
-var usageStr = "I hope it doesn't explode!"
-
-var log = logging.MustGetLogger("example")
+var log *logging.Logger
+var ec *nats.EncodedConn
 
 func init() {
 	// logging
+	log = logging.MustGetLogger("example")
 	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
 	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
 	format := logging.MustStringFormatter(
@@ -27,6 +30,8 @@ func init() {
 	backend1Leveled := logging.AddModuleLevel(backend1)
 	backend1Leveled.SetLevel(logging.ERROR, "")
 	logging.SetBackend(backend1Leveled, backend2Formatter)
+
+	//defer ec.Close()
 
 	// handle ^c (os.Interrupt)
 	c := make(chan os.Signal, 1)
@@ -55,13 +60,7 @@ func main() {
 		Run:   history,
 	}
 
-	var cmdPrint = &cobra.Command{
-		Use:   "print [string to print]",
-		Short: "Print anything to the screen",
-		Long:  "print is for printing anything back to the screen. For many years people have printed back to the screen.",
-		Args:  cobra.MinimumNArgs(1),
-		Run:   daemonize,
-	}
+	/// example commands
 
 	var cmdEcho = &cobra.Command{
 		Use:   "echo [string to echo]",
@@ -88,9 +87,32 @@ func main() {
 	cmdTimes.Flags().IntVarP(&echoTimes, "times", "t", 1, "times to echo the input")
 
 	var rootCmd = &cobra.Command{Use: "app"}
-	rootCmd.AddCommand(cmdPrint, cmdEcho, cmdHistory, cmdDaemonize)
+	rootCmd.AddCommand(cmdEcho, cmdHistory, cmdDaemonize)
 	cmdEcho.AddCommand(cmdTimes)
 	rootCmd.Execute()
 }
 
-//TODO: refactor main.go into main.go
+func cleanup(c chan os.Signal) {
+	<-c
+	log.Warning("Got os.Interrupt: cleaning up")
+
+	//TODO: which way to close microservers? a global mode switch (server/client?)
+	// the following block, including the wait time, should be executed (and cleanup message sent) only if server
+
+	// telling all microservers to cleanup before forcibly exiting
+	// Requests
+	/*	var cReq cleanupReq
+		cReq.Cmd = "cleanup"
+		var cRes cleanupRes
+		err := ec.Request("cleanup", cReq, &cRes, 100*time.Millisecond)
+		if err != nil {
+			fmt.Printf("Request failed: %v\n", err)
+		}*/
+
+	log.Noticef("Cleanup: awaiting 1secs for subservers cleanup")
+	// give everyone globally 10 second to clean up everything
+	time.Sleep(1000000000)
+
+	// exiting gracefully
+	os.Exit(1)
+}

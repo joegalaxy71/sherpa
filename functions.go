@@ -13,17 +13,13 @@ func cleanup(c chan os.Signal) {
 	os.Exit(1)
 }
 
-func listenAndReply(commandCh chan *command, responseCh chan *response) {
+func listenAndReply(history_reqCh chan *history_req) {
 	defer wg.Done()
 
 	for {
 		//var c *command
-		c := <-commandCh
-		fmt.Printf("Command received on netchan commandCh: from= %s, action=%s, arg=%s\n", c.From, c.Action, c.Arg)
-		//by protocol, c.Arg is the path
-		// visit each supplied path we do a filepath.walk
+		hr := <-history_reqCh
+		fmt.Printf("History request received on channel history_reqCh: Cmd = %s\n", hr.Cmd)
 
-		r := &response{c.From, "ok"}
-		responseCh <- r
 	}
 }

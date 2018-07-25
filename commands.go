@@ -5,6 +5,7 @@ import (
 	gnatsd "github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/nats"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 func history(cmd *cobra.Command, args []string) {
@@ -21,7 +22,7 @@ func history(cmd *cobra.Command, args []string) {
 	// CLIENT PART
 	// * enter termbox mode
 	// * get partial commands from user
-	// * display a browseable list of partially matching commands
+	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
 	fmt.Print("reached history\n")
@@ -32,14 +33,22 @@ func history(cmd *cobra.Command, args []string) {
 	nc, _ := nats.Connect(nats.DefaultURL)
 	ec, _ := nats.NewEncodedConn(nc, nats.GOB_ENCODER)
 	defer ec.Close()
-	commandCh := make(chan *command)
+	/*commandCh := make(chan *command)
 	ec.BindSendChan("commands", commandCh)
 	responseCh := make(chan *response)
-	ec.BindRecvChan("responses", responseCh)
+	ec.BindRecvChan("responses", responseCh)*/
 
 	log.Notice("history: sending NATS test message")
 
-	commandCh <- &command{"Me", "Test", "args"}
+	// Requests
+	var hrep history_resp
+	var hreq history_req
+	err := ec.Request("history", hreq, &hrep, 10*time.Millisecond)
+	if err != nil {
+		fmt.Printf("Request failed: %v\n", err)
+	}
+
+	//commandCh <- &command{"Me", "Test", "args"}
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)
@@ -69,16 +78,26 @@ func daemonize(cmd *cobra.Command, args []string) {
 	nc, _ := nats.Connect(nats.DefaultURL)
 	ec, _ := nats.NewEncodedConn(nc, nats.GOB_ENCODER)
 	defer ec.Close()
-	commandCh := make(chan *command)
+	/*commandCh := make(chan *command)
 	ec.BindRecvChan("commands", commandCh)
 	responseCh := make(chan *response)
-	ec.BindSendChan("responses", responseCh)
+	ec.BindSendChan("responses", responseCh)*/
+
+	history_reqCh := make(chan *history_req)
+
+	ec.Subscribe("history", func(subj, reply string, h *history_req) {
+		fmt.Printf("Received an history req on subject %s! %+v\n", subj, h)
+		var hresp history_resp
+		ec.Publish(reply, hresp)
+
+		//history_reqCh <- h
+	})
 
 	// launch a goroutine to fetch commands (they arrive via netchan)
 	// we use wg.Add(1) to add to the waitgroup so we can wait for all goroutines to end
 	// it obviously exits if we explicitly call os.exit
 	wg.Add(1)
-	go listenAndReply(commandCh, responseCh)
+	go listenAndReply(history_reqCh)
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)

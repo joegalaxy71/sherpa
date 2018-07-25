@@ -41,11 +41,16 @@ func history(cmd *cobra.Command, args []string) {
 	log.Notice("history: sending NATS test message")
 
 	// Requests
-	var hrep history_resp
+	var hresp history_resp
 	var hreq history_req
-	err := ec.Request("history", hreq, &hrep, 10*time.Millisecond)
+	hreq.Cmd = "zfs"
+	err := ec.Request("history", hreq, &hresp, 10*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
+	} else {
+		for _, hint := range hresp.List {
+			fmt.Println(hint)
+		}
 	}
 
 	//commandCh <- &command{"Me", "Test", "args"}
@@ -88,6 +93,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 	ec.Subscribe("history", func(subj, reply string, h *history_req) {
 		fmt.Printf("Received an history req on subject %s! %+v\n", subj, h)
 		var hresp history_resp
+		hresp.List = append(hresp.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
 		ec.Publish(reply, hresp)
 
 		//history_reqCh <- h

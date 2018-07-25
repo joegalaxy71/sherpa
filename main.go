@@ -109,7 +109,7 @@ func cleanup(c chan os.Signal) {
 			fmt.Printf("Request failed: %v\n", err)
 		}*/
 
-	log.Noticef("Cleanup: awaiting 1secs for subservers cleanup")
+	log.Notice("Cleanup: awaiting 1secs for subservers cleanup")
 	// give everyone globally 10 second to clean up everything
 	time.Sleep(1000000000)
 

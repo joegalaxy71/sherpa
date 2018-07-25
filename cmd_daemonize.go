@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/spf13/cobra"
+	"os"
 )
 
 func daemonize(cmd *cobra.Command, args []string) {
@@ -37,7 +38,7 @@ func initHistory() {
 
 	initNATSClient()
 
-	ec.Subscribe("history",
+	historySub, err := ec.Subscribe("history",
 		func(subj, reply string, h *historyReq) {
 			log.Notice("Received an history req on subject %s! %+v\n", subj, h)
 			var hresp historyRes
@@ -46,11 +47,18 @@ func initHistory() {
 			ec.Publish(reply, hresp)
 			log.Notice("Sent an history resp back\n")
 		})
+	if err != nil {
+		log.Error("Unable to contact sherpa server")
+		os.Exit(0)
+	}
 
 	ec.Subscribe("cleanup",
 		func(subj, reply string, c *cleanupReq) {
 			log.Notice("Received an cleanup order on subject %s! %+v\n", subj, c)
-			log.Notice("History subserver: cleanup\n")
+			log.Notice("History subserver: cleanup started\n")
+			historySub.Unsubscribe()
+			log.Notice("History subserver: cleanup completed\n")
+
 		})
 }
 

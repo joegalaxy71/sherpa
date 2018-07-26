@@ -19,8 +19,6 @@ func daemonize(cmd *cobra.Command, args []string) {
 	var history microServer
 	history.name = "history"
 	history.run = historyServer
-	history.req = historyReq{}
-	history.res = historyRes{}
 
 	go initMicroServer(history)
 	wg.Add(1)
@@ -35,13 +33,13 @@ func daemonize(cmd *cobra.Command, args []string) {
 
 // microservers (via goroutine)
 
-func initHistory() {
+/*func initHistory() {
 
 	initNATSClient()
 
 	historySub, err := ec.Subscribe("history",
 		func(subj, reply string, h *historyReq) {
-			log.Notice("Received an history req on subject %s! %+v\n", subj, h)
+			log.Notice("Received an history Req on subject %s! %+v\n", subj, h)
 			var hresp historyRes
 			// actual work done
 			hresp.List = append(hresp.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
@@ -61,20 +59,21 @@ func initHistory() {
 			log.Notice("History subserver: cleanup completed\n")
 
 		})
-}
+}*/
 
 func initMicroServer(us microServer) {
 
 	initNATSClient()
 
 	subscription, err := ec.Subscribe(us.name,
-		func(subj, reply string, req request) {
-			log.Notice("Received a req: subj:%s, reply:%s, request: %+v\n", subj, reply, req)
+		func(subj, reply string, req *request) {
+			log.Notice("Received a Req: subj:%s, reply:%s, request: %+v\n", subj, reply, req)
 
-			us.res = us.run(us.req)
+			var res response
+			res = us.run(*req)
 
-			ec.Publish(reply, us.res)
-			log.Notice("Sent an %s resp back\n", us.name)
+			ec.Publish(reply, res)
+			log.Notice("Sent an %s resp back\n", res.Res)
 		})
 	if err != nil {
 		log.Error("Unable to subscribe to topic %s", us.name)
@@ -82,12 +81,11 @@ func initMicroServer(us microServer) {
 	}
 
 	ec.Subscribe("cleanup",
-		func(subj, reply string, c *cleanupReq) {
-			log.Notice("Received an cleanup order on subject %s! %+v\n", subj, c)
+		func(subj, reply string, req *request) {
+			log.Notice("Received an cleanup order on subject %s! %+v\n", subj, req)
 			log.Notice("History subserver: cleanup started\n")
 			subscription.Unsubscribe()
 			log.Notice("History subserver: cleanup completed\n")
-
 		})
 }
 
@@ -95,16 +93,12 @@ func historyServer(req request) response {
 	log.Warning("reached historyServer")
 
 	//type assert request/response
-	hreq, ok := req.(historyReq)
-	log.Notice("Searched: %s", hreq.Req)
-	if ok != true {
-		log.Error("Failed request type assertion")
-	}
+	log.Notice("Searched: %s", req.Req)
 
-	var hres historyRes
+	var res response
 
 	// actual work done
-	hres.List = append(hres.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
+	res.List = append(res.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
 
-	return hres
+	return res
 }

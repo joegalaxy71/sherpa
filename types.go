@@ -14,6 +14,15 @@ type request struct {
 }
 
 type response struct {
-	Res  string
-	List []string
+	Res     string
+	List    []string
+	Prompts []prompt
+}
+
+//REMEMBER ALWAYS
+// the less identifiers, the best
+
+type prompt struct {
+	Name  string
+	Value string
 }

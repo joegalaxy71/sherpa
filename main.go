@@ -57,7 +57,15 @@ func main() {
 		Short: "Get the sherpa collected history",
 		Long:  "Sherpa gets history from all the sources available. This commands let you walk in the history.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   history,
+		Run:   historyClient,
+	}
+
+	var cmdPrompt = &cobra.Command{
+		Use:   "prompt",
+		Short: "Allowa to inspect prompts and/or change the current prompt",
+		Long:  "Sherpa mantains an updated list of prompts. This commands let you see the list and change your prompt.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   promptClient,
 	}
 
 	/// example commands
@@ -87,7 +95,7 @@ func main() {
 	cmdTimes.Flags().IntVarP(&echoTimes, "times", "t", 1, "times to echo the input")
 
 	var rootCmd = &cobra.Command{Use: "app"}
-	rootCmd.AddCommand(cmdEcho, cmdHistory, cmdDaemonize)
+	rootCmd.AddCommand(cmdEcho, cmdHistory, cmdPrompt, cmdDaemonize)
 	cmdEcho.AddCommand(cmdTimes)
 	rootCmd.Execute()
 

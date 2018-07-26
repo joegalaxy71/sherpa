@@ -16,7 +16,10 @@ func daemonize(cmd *cobra.Command, args []string) {
 	//go initHistory()
 	//wg.Add(1)
 
-	microServers := []microServer{{"history", historyServer}, {"prompt", promptServer}}
+	microServers := []microServer{
+		{"history", historyServer},
+		{"prompt", promptServer},
+	}
 
 	/*	var history microServer
 		history.name = "history"

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func historyClient(cmd *cobra.Command, args []string) {
+func promptClient(cmd *cobra.Command, args []string) {
 
 	//TODO: implement everything
 
@@ -21,23 +21,23 @@ func historyClient(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	log.Info("reached history\n")
+	log.Info("reached prompt\n")
 
 	initNATSClient()
 
-	log.Notice("history: sending NATS test message")
+	log.Notice("prompt: sending NATS test message")
 
 	// Requests
 	var res response
 	var req request
-	req.Req = "zfs"
+	req.Req = "list"
 
-	err := ec.Request("history", req, &res, 100*time.Millisecond)
+	err := ec.Request("prompt", req, &res, 100*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
-		for _, hint := range res.List {
-			fmt.Println(hint)
+		for _, prompt := range res.Prompts {
+			fmt.Printf("Prompt: Name=%s, Value=%s\n", prompt.Name, prompt.Value)
 		}
 	}
 }

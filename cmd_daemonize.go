@@ -47,37 +47,37 @@ func initMicroServer(us microServer) error {
 
 	err := us.init()
 	if err == nil {
-		log.Noticef("%s subserver: init completed\n", us.name)
+		log.Notice("%s subserver: init completed\n", us.name)
 	} else {
-		log.Errorf("%s subserver: init failed, aborting\n", us.name)
+		log.Error("%s subserver: init failed, aborting\n", us.name)
 		os.Exit(-1)
 	}
 
 	subscription, err := ec.Subscribe(us.name,
 		func(subj, reply string, req *request) {
-			log.Noticef("Received a Req: subj:%s, reply:%s, request: %+v\n", subj, reply, req)
+			log.Notice("Received a Req: subj:%s, reply:%s, request: %+v\n", subj, reply, req)
 
 			var res response
 			res = us.serve(*req)
 
 			ec.Publish(reply, res)
-			log.Noticef("Sent an %s resp back\n", res.Res)
+			log.Notice("Sent an %s resp back\n", res.Res)
 		})
 	if err != nil {
-		log.Errorf("Unable to subscribe to topic %s", us.name)
+		log.Error("Unable to subscribe to topic %s", us.name)
 		os.Exit(-1)
 	}
 
 	ec.Subscribe("cleanup",
 		func(subj, reply string, req *request) {
-			log.Noticef("Received an cleanup order on subject %s! %+v\n", subj, req)
-			log.Noticef("%s subserver: cleanup started\n", us.name)
+			log.Notice("Received an cleanup order on subject %s! %+v\n", subj, req)
+			log.Notice("%s subserver: cleanup started\n", us.name)
 			subscription.Unsubscribe()
 			err := us.cleanup()
 			if err != nil {
-				log.Noticef("%s subserver: cleanup completed\n", us.name)
+				log.Notice("%s subserver: cleanup completed\n", us.name)
 			} else {
-				log.Warningf("%s subserver: cleanup failed\n")
+				log.Warning("%s subserver: cleanup failed\n")
 			}
 		})
 

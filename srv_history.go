@@ -11,9 +11,13 @@ const history_file = "/Users/simo/.bash_history"
 var he []string //history entries
 
 func historyInit() error {
+	// read the whole file in a []byte
 	input, err := ioutil.ReadFile(history_file)
+	// typecats to string, then split by newline into a []string
 	inputStrings := strings.Split(string(input), "\n")
+	// remove duplicates
 	he = unique(inputStrings)
+	// sort them
 	sort.Sort(sort.StringSlice(he))
 	return err
 }
@@ -22,12 +26,16 @@ func historyServe(req request) response {
 	log.Warning("reached historyServer")
 
 	//type assert request/response
-	log.Noticef("Searched: %s", req.Req)
+	log.Notice("Searched: %s", req.Req)
 
 	var res response
 
-	// actual work done
-	res.List = append(res.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
+	for _, entry := range he {
+		if strings.Contains(entry, req.Req) {
+			// actual work done
+			res.List = append(res.List, entry)
+		}
+	}
 
 	return res
 }

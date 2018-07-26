@@ -8,7 +8,7 @@ func promptServe(req request) response {
 	log.Warning("reached promptServer")
 
 	//type assert request/response
-	log.Noticef("Searched: %s", req.Req)
+	log.Notice("Searched: %s", req.Req)
 
 	var res response
 

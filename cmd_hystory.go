@@ -28,15 +28,22 @@ func history(cmd *cobra.Command, args []string) {
 	log.Notice("history: sending NATS test message")
 
 	// Requests
-	var hresp historyRes
+	var hres historyRes
 	var hreq historyReq
 	hreq.Req = "zfs"
-	err := ec.Request("history", hreq, &hresp, 100*time.Millisecond)
+
+	req := request(hreq)
+	res := response(hres)
+
+	err := ec.Request("history", req, &res, 100*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
-		for _, hint := range hresp.List {
-			fmt.Println(hint)
+		hres, ok := res.(historyRes)
+		if ok == true {
+			for _, hint := range hres.List {
+				fmt.Println(hint)
+			}
 		}
 	}
 

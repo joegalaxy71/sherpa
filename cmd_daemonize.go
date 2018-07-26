@@ -19,17 +19,14 @@ func daemonize(cmd *cobra.Command, args []string) {
 	var history microServer
 	history.name = "history"
 	history.run = historyServer
+	history.req = historyReq{}
+	history.res = historyRes{}
 
-	go initMicroServer(history, historyReq{"ok"}, historyRes{"ok", []string{}})
+	go initMicroServer(history)
 	wg.Add(1)
 
 	// init complete
-	log.Info("Init complete, entering daemon mode")
-
-	// launch a goroutine to fetch commands (they arrive via netchan)
-	// we use wg.Add(1) to add to the waitgroup so we can wait for all goroutines to end
-	// it obviously exits if we explicitly call os.exit
-	//go listenAndReply(historyReqCh)
+	log.Notice("Init complete, entering daemon mode")
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)
@@ -52,7 +49,7 @@ func initHistory() {
 			log.Notice("Sent an history resp back\n")
 		})
 	if err != nil {
-		log.Error("Unable to contact sherpa server")
+		log.Error("Unable to contact server")
 		os.Exit(0)
 	}
 
@@ -66,21 +63,21 @@ func initHistory() {
 		})
 }
 
-func initMicroServer(us microServer, req request, resp response) {
+func initMicroServer(us microServer) {
 
 	initNATSClient()
 
 	subscription, err := ec.Subscribe(us.name,
 		func(subj, reply string, req request) {
-			log.Notice("Received a req on channel:%s, subject:%s %+v\n", us.name, subj, req)
+			log.Notice("Received a req: subj:%s, reply:%s, request: %+v\n", subj, reply, req)
 
-			resp = us.run(req)
+			us.res = us.run(us.req)
 
-			ec.Publish(reply, resp)
+			ec.Publish(reply, us.res)
 			log.Notice("Sent an %s resp back\n", us.name)
 		})
 	if err != nil {
-		log.Error("Unable to contact sherpa server")
+		log.Error("Unable to subscribe to topic %s", us.name)
 		os.Exit(0)
 	}
 

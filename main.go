@@ -90,6 +90,7 @@ func main() {
 	rootCmd.AddCommand(cmdEcho, cmdHistory, cmdDaemonize)
 	cmdEcho.AddCommand(cmdTimes)
 	rootCmd.Execute()
+
 }
 
 func cleanup(c chan os.Signal) {

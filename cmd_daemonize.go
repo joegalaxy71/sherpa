@@ -11,17 +11,24 @@ func daemonize(cmd *cobra.Command, args []string) {
 	initNATSServer()
 	initNATSClient()
 
-	// init microservers
+	// init microServers
 
 	//go initHistory()
 	//wg.Add(1)
 
-	var history microServer
-	history.name = "history"
-	history.run = historyServer
+	microServers := []microServer{{"history", historyServer}, {"prompt", promptServer}}
 
-	go initMicroServer(history)
-	wg.Add(1)
+	/*	var history microServer
+		history.name = "history"
+		history.run = historyServer*/
+
+	for _, uServer := range microServers {
+		go initMicroServer(uServer)
+		wg.Add(1)
+	}
+
+	/*	go initMicroServer(history)
+		wg.Add(1)*/
 
 	// init complete
 	log.Notice("Init complete, entering daemon mode")
@@ -30,36 +37,6 @@ func daemonize(cmd *cobra.Command, args []string) {
 	// (should never exit) (exit only with signal.interrupt)
 	wg.Wait()
 }
-
-// microservers (via goroutine)
-
-/*func initHistory() {
-
-	initNATSClient()
-
-	historySub, err := ec.Subscribe("history",
-		func(subj, reply string, h *historyReq) {
-			log.Notice("Received an history Req on subject %s! %+v\n", subj, h)
-			var hresp historyRes
-			// actual work done
-			hresp.List = append(hresp.List, "zfs list", "zfs list -t snap", "zfs list -t snap -o name")
-			ec.Publish(reply, hresp)
-			log.Notice("Sent an history resp back\n")
-		})
-	if err != nil {
-		log.Error("Unable to contact server")
-		os.Exit(0)
-	}
-
-	ec.Subscribe("cleanup",
-		func(subj, reply string, c *cleanupReq) {
-			log.Notice("Received an cleanup order on subject %s! %+v\n", subj, c)
-			log.Notice("History subserver: cleanup started\n")
-			historySub.Unsubscribe()
-			log.Notice("History subserver: cleanup completed\n")
-
-		})
-}*/
 
 func initMicroServer(us microServer) {
 

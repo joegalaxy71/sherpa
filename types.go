@@ -3,8 +3,10 @@ package main
 // MICROSERVER
 
 type microServer struct {
-	name string
-	run  func(request) response
+	name    string
+	init    func() error
+	serve   func(request) response
+	cleanup func() error
 }
 
 // REQUEST/RESPPONSE

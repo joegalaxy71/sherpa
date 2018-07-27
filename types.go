@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/jinzhu/gorm"
+)
+
 // MICROSERVER
 
 type microServer struct {
@@ -9,7 +13,7 @@ type microServer struct {
 	cleanup func() error
 }
 
-// REQUEST/RESPPONSE
+// REQUEST / RESPONSE
 
 type request struct {
 	Req string
@@ -27,4 +31,11 @@ type response struct {
 type prompt struct {
 	Name  string
 	Value string
+}
+
+// DB TYPES
+
+type HistoryEntry struct {
+	gorm.Model
+	Entry string
 }

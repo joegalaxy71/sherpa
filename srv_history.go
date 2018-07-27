@@ -1,18 +1,29 @@
 package main
 
+// SPECS
+// follow the history file
+// when a change is detected load the delta (shell only append)
+// and insert into sqlite db
+// use gorm and gorm defaults, so all records will have automatically "created at"
+
 import (
+	"github.com/fsnotify/fsnotify"
 	"io/ioutil"
 	"sort"
 	"strings"
 )
 
-const history_file = "/Users/simo/.bash_history"
+const HISTORY_FILE = "/Users/simo/.bash_history"
 
 var he []string //history entries
+var watcher *fsnotify.Watcher
 
 func historyInit() error {
+
+	go watchHistory()
+
 	// read the whole file in a []byte
-	input, err := ioutil.ReadFile(history_file)
+	input, err := ioutil.ReadFile(HISTORY_FILE)
 	// typecats to string, then split by newline into a []string
 	inputStrings := strings.Split(string(input), "\n")
 	// remove duplicates
@@ -23,10 +34,10 @@ func historyInit() error {
 }
 
 func historyServe(req request) response {
-	log.Warning("reached historyServer")
+	log.Warningf("reached historyServer")
 
 	//type assert request/response
-	log.Notice("Searched: %s", req.Req)
+	log.Noticef("Searched: %s", req.Req)
 
 	var res response
 
@@ -56,4 +67,32 @@ func unique(stringSlice []string) []string {
 		}
 	}
 	return list
+}
+
+func watchHistory() {
+	// we create a watcher to watch the history file
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// we create and launch a goroutine to persist after init
+	go func() {
+		for {
+			select {
+			case event := <-watcher.Events:
+				log.Debugf("event: %s", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Debugf("modified file: %s", event.Name)
+				}
+			case err := <-watcher.Errors:
+				log.Debugf("error: %s", err)
+			}
+		}
+	}()
+
+	err = watcher.Add(HISTORY_FILE)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/nats-io/nats"
 	"github.com/op/go-logging"
 	"github.com/spf13/cobra"
@@ -14,10 +16,12 @@ import (
 )
 
 // globals
+const DBFILE = "/Users/simo/go/bin/test.db"
 
 var wg sync.WaitGroup
 var log *logging.Logger
 var ec *nats.EncodedConn
+var db *gorm.DB
 
 func init() {
 	// logging
@@ -31,7 +35,14 @@ func init() {
 	backend1Leveled.SetLevel(logging.ERROR, "")
 	logging.SetBackend(backend1Leveled, backend2Formatter)
 
-	//defer ec.Close()
+	db, err := gorm.Open("sqlite3", DBFILE)
+	if err != nil {
+		panic("failed to connect database")
+	}
+	defer db.Close()
+
+	// Migrate the schema
+	db.AutoMigrate(&HistoryEntry{})
 
 	// handle ^c (os.Interrupt)
 	c := make(chan os.Signal, 1)
@@ -103,7 +114,7 @@ func main() {
 
 func cleanup(c chan os.Signal) {
 	<-c
-	log.Warning("Got os.Interrupt: cleaning up")
+	log.Warningf("Got os.Interrupt: cleaning up")
 
 	//TODO: which way to close microservers? a global mode switch (server/client?)
 	// the following block, including the wait time, should be executed (and cleanup message sent) only if server
@@ -118,7 +129,7 @@ func cleanup(c chan os.Signal) {
 			fmt.Printf("Request failed: %v\n", err)
 		}*/
 
-	log.Notice("Cleanup: awaiting 1secs for subservers cleanup")
+	log.Noticef("Cleanup: awaiting 1secs for subservers cleanup")
 	// give everyone globally 10 second to clean up everything
 	time.Sleep(1000000000)
 

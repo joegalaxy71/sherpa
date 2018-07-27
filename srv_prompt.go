@@ -5,10 +5,10 @@ func promptInit() error {
 }
 
 func promptServe(req request) response {
-	log.Warning("reached promptServer")
+	log.Warningf("reached promptServer")
 
 	//type assert request/response
-	log.Notice("Searched: %s", req.Req)
+	log.Noticef("Searched: %s", req.Req)
 
 	var res response
 

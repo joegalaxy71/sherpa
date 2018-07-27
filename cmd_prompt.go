@@ -21,11 +21,11 @@ func promptClient(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	log.Info("reached prompt\n")
+	log.Infof("reached prompt\n")
 
 	initNATSClient()
 
-	log.Notice("prompt: sending NATS test message")
+	log.Noticef("prompt: sending NATS test message")
 
 	// Requests
 	var res response

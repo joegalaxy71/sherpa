@@ -21,11 +21,11 @@ func historyClient(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	log.Info("reached history\n")
+	log.Infof("reached history\n")
 
 	initNATSClient()
 
-	log.Notice("history: sending NATS test message")
+	log.Noticef("history: sending NATS test message")
 
 	// Requests
 	var res response

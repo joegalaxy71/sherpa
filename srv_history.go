@@ -81,9 +81,10 @@ func watchHistory() {
 		for {
 			select {
 			case event := <-watcher.Events:
-				log.Debugf("event: %s", event)
+				//log.Debugf("event: %s", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					log.Debugf("modified file: %s", event.Name)
+					updateEntriesDB()
 				}
 			case err := <-watcher.Errors:
 				log.Debugf("error: %s", err)
@@ -95,4 +96,18 @@ func watchHistory() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func updateEntriesDB() {
+	// determine if we've added entries in the past (check status)
+
+	// if yes we read only the new portion of the file
+
+	// else we read the whole file
+
+	//TODO: what happens if the history file gets destroyed or modified?
+	// should we treat it as a new file?
+
+	// then we split what we've read into strings
+	// and we insert in the db
 }

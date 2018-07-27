@@ -39,3 +39,7 @@ type HistoryEntry struct {
 	gorm.Model
 	Entry string
 }
+
+type Status struct {
+	HistSize uint32
+}

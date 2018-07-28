@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/nats-io/nats"
-	"github.com/op/go-logging"
-	"github.com/spf13/cobra"
 	"os"
 	"os/signal"
 	"strings"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/nats-io/nats"
+	"github.com/op/go-logging"
+	"github.com/spf13/cobra"
 )
 
 // globals
@@ -22,6 +23,7 @@ var wg sync.WaitGroup
 var log *logging.Logger
 var ec *nats.EncodedConn
 var db *gorm.DB
+var status Status
 
 func init() {
 	// logging
@@ -35,20 +37,31 @@ func init() {
 	backend1Leveled.SetLevel(logging.ERROR, "")
 	logging.SetBackend(backend1Leveled, backend2Formatter)
 
-	db, err := gorm.Open("sqlite3", DBFILE)
+	// SQLite DB via Gorm
+	dbconn, err := gorm.Open("sqlite3", DBFILE)
 	if err != nil {
 		panic("failed to connect database")
 	}
-	defer db.Close()
+
+	db = dbconn
 
 	// Migrate the schema
 	db.AutoMigrate(&HistoryEntry{})
+	db.AutoMigrate(&Status{})
+
+	//create a Status record if it doesn't exist
+	db.FirstOrCreate(&Status{}, Status{One: "one"})
+
+	log.Noticef("DB after init= %+v", db)
 
 	// handle ^c (os.Interrupt)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
 	go cleanup(c)
+
+	//DEBUG
+	// go follow()
 }
 
 func main() {
@@ -135,4 +148,11 @@ func cleanup(c chan os.Signal) {
 
 	// exiting gracefully
 	os.Exit(1)
+}
+
+func follow() {
+	for {
+		log.Noticef("%+v", db)
+		time.Sleep(3000000000)
+	}
 }

@@ -41,5 +41,7 @@ type HistoryEntry struct {
 }
 
 type Status struct {
-	HistSize uint32
+	gorm.Model
+	One      string `gorm:"default:'one'"`
+	HistFrom uint32 `gorm:"default:'0'"`
 }

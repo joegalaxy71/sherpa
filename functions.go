@@ -18,10 +18,18 @@ func initNATSServer() {
 	go gnatsd.Run(s)
 }
 
-func initNATSClient() {
+func initNATSClient() error {
 	//NATS client config & startup
-	NATSConnection, _ := nats.Connect(nats.DefaultURL)
-	NATSEncodedConnection, _ := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
+	NATSConnection, err := nats.Connect(nats.DefaultURL)
+	if err != nil {
+		return err
+	}
+	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
+	if err != nil {
+		return err
+	}
 
 	ec = NATSEncodedConnection
+
+	return nil
 }

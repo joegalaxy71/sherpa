@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
+	_ "strings"
 	"time"
+
+	"github.com/rivo/tview"
+	"github.com/spf13/cobra"
 )
 
 func historyClient(cmd *cobra.Command, args []string) {
@@ -25,6 +28,8 @@ func historyClient(cmd *cobra.Command, args []string) {
 
 	initNATSClient()
 
+	terminalHistory()
+
 	log.Noticef("history: sending NATS test message")
 
 	// Requests
@@ -40,4 +45,42 @@ func historyClient(cmd *cobra.Command, args []string) {
 			fmt.Println(hint)
 		}
 	}
+}
+
+func terminalHistory() {
+
+	app := tview.NewApplication()
+
+	//inputfield (history incremental partial match prompt)
+	inputField := tview.NewInputField().
+		SetLabel("[red]user@host#").
+		SetChangedFunc(updateList)
+	//SetFieldWidth(80).
+	/*		SetDoneFunc(func(key tcell.Key) {
+			app.Stop()*/
+	//})
+
+	// text (separator)
+	text := tview.NewTextView().SetDynamicColors(true)
+	fmt.Fprintf(text, "[gray]Type to filter, UP/DOWN to move, TAB to select and paste after prompt, C-g to cancel")
+
+	// table (history list)
+	table := tview.NewTable().SetBorders(false)
+
+	table.SetCell(0, 0, tview.NewTableCell("start typing to populate list...").SetAlign(tview.AlignLeft))
+
+	flex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(inputField, 1, 1, true).
+		AddItem(text, 1, 1, false).
+		AddItem(table, 0, 1, false)
+
+	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
+		panic(err)
+	}
+
+}
+
+func updateList(changed string) {
+	log.Debugf(changed)
 }

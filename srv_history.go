@@ -173,7 +173,7 @@ func updateEntriesDB() error {
 
 	//db.Save(&status)
 
-	log.Noticef("%+v", db)
+	//log.Noticef("%+v", db)
 
 	// typecats to string, then split by newline into a []string
 	inputStrings := strings.Split(string(byteSlice), "\n")

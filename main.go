@@ -52,6 +52,8 @@ func init() {
 	//create a Status record if it doesn't exist
 	db.FirstOrCreate(&Status{}, Status{One: "one"})
 
+	db.Where("One = ?", "one").First(&status)
+
 	log.Noticef("DB after init= %+v", db)
 
 	// handle ^c (os.Interrupt)

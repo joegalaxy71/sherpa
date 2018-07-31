@@ -8,9 +8,11 @@ package main
 
 import (
 	_ "errors"
+	_ "fmt"
 	"os"
 	"sort"
 	"strings"
+	// "time"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -175,12 +177,16 @@ func updateEntriesDB() error {
 
 	//log.Noticef("%+v", db)
 
+	//start := time.Now()
+
 	// typecats to string, then split by newline into a []string
 	inputStrings := strings.Split(string(byteSlice), "\n")
 	// remove duplicates
 	he = unique(inputStrings)
 	// sort them
 	sort.Sort(sort.StringSlice(he))
+
+	//fmt.Printf("%s took %v\n", time.Since(start))
 
 	//TODO: what happens if the history file gets destroyed or modified?
 	// should we treat it as a new file?

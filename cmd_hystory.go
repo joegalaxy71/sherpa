@@ -6,9 +6,17 @@ import (
 	_ "strings"
 	"time"
 
+	//#include<stdio.h>
+	//
+	//void inCFile() {
+	//printf("I am in C code in a .c file now!\n");
+	//}
+	"C"
+
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
+	//"github.com/kr/pty"
 )
 
 var entries *tview.Table
@@ -49,8 +57,10 @@ func terminalHistory() {
 		SetChangedFunc(updateList).
 		SetDoneFunc(func(key tcell.Key) {
 			app.Stop()
+
+			C.inCFile()
+
 		})
-	//})
 
 	// text (separator)
 	text := tview.NewTextView().SetDynamicColors(true)

@@ -54,7 +54,7 @@ func init() {
 
 	db.Where("One = ?", "one").First(&status)
 
-	log.Noticef("DB after init= %+v", db)
+	//log.Noticef("DB after init= %+v", db)
 
 	// handle ^c (os.Interrupt)
 	c := make(chan os.Signal, 1)

@@ -2,15 +2,18 @@ package main
 
 import (
 	"fmt"
+	"os"
 	_ "strings"
 	"time"
 
+	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
 )
 
 var entries *tview.Table
 var app *tview.Application
+var selectedEntry string
 
 func historyClient(cmd *cobra.Command, args []string) {
 
@@ -28,6 +31,7 @@ func historyClient(cmd *cobra.Command, args []string) {
 	// * allow the user to select one and paste it to the shell prompt
 
 	log.Infof("reached history\n")
+	log.Infof("Parent pid:%v", os.Getppid())
 
 	initNATSClient()
 
@@ -42,10 +46,10 @@ func terminalHistory() {
 	//inputfield (history incremental partial match prompt)
 	inputField := tview.NewInputField().
 		SetLabel("[red]user@host#").
-		SetChangedFunc(updateList)
-	//SetFieldWidth(80).
-	/*		SetDoneFunc(func(key tcell.Key) {
-			app.Stop()*/
+		SetChangedFunc(updateList).
+		SetDoneFunc(func(key tcell.Key) {
+			app.Stop()
+		})
 	//})
 
 	// text (separator)
@@ -66,10 +70,12 @@ func terminalHistory() {
 	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
 		panic(err)
 	}
-
 }
 
 func updateList(changed string) {
+
+	selectedEntry = changed
+
 	// Requests
 	var res response
 	var req request

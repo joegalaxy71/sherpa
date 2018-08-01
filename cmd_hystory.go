@@ -6,10 +6,29 @@ import (
 	_ "strings"
 	"time"
 
-	//#include<stdio.h>
+	//#include <stdio.h>
+	//#include <fcntl.h>
+	//#include <termios.h>
+	//#include <sys/ioctl.h>
+	//#include <unistd.h>
 	//
-	//void inCFile() {
-	//printf("I am in C code in a .c file now!\n");
+	//void tw() {
+	//int fd;
+	//char *term = "/dev/ttys005";
+	//char *text = "ok";
+	//
+	//fd = open(term, O_RDONLY);
+	//if (fd < 0) {
+	//perror(term);
+	//perror("could not open tty");
+	//}
+	//
+	//while (*text) {
+	//if (ioctl(fd, TIOCSTI, text)) {
+	//perror("ioctl");
+	//}
+	//text++;
+	//}
 	//}
 	"C"
 
@@ -58,7 +77,7 @@ func terminalHistory() {
 		SetDoneFunc(func(key tcell.Key) {
 			app.Stop()
 
-			C.inCFile()
+			C.tw()
 
 		})
 

@@ -5,14 +5,16 @@ import (
 	"os"
 	_ "strings"
 	"time"
+	"unsafe"
 
 	"github.com/k0kubun/go-ansi"
 
 	//#include <sys/ioctl.h>
 	//#include <sgtty.h>
+	//#include <stdlib.h>
 	//
-	//void tw() {
-	//char *text = "zpool list";
+	//void tw(char *text) {
+	////char *text = "zpool list";
 	//
 	//
 	//while (*text) {
@@ -21,22 +23,6 @@ import (
 	//text++;
 	//
 	//}
-	//}
-	//
-	//void echo_off()
-	//{
-	//struct sgttyb state;
-	//(void)ioctl(0, (int)TIOCGETP, (char *)&state);
-	//state.sg_flags &= ~ECHO;
-	//(void)ioctl(0, (int)TIOCSETP, (char *)&state);
-	//}
-	//
-	//void echo_on()
-	//{
-	//struct sgttyb state;
-	//(void)ioctl(0, (int)TIOCGETP, (char *)&state);
-	//state.sg_flags |= ECHO;
-	//(void)ioctl(0, (int)TIOCSETP, (char *)&state);
 	//}
 	"C"
 
@@ -89,7 +75,12 @@ func terminalHistory() {
 
 			//fmt.Fprintf(screen, "\033[%d;%dH", x, y)
 
-			C.tw()
+			//create a C string (!)
+			cstr := C.CString("zdb -list")
+			defer C.free(unsafe.Pointer(cstr))
+
+			C.tw(cstr)
+
 			ansi.EraseInLine(2)
 			ansi.CursorNextLine(0)
 

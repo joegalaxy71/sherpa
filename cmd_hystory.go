@@ -14,8 +14,6 @@ import (
 	//#include <stdlib.h>
 	//
 	//void tw(char *text) {
-	////char *text = "zpool list";
-	//
 	//
 	//while (*text) {
 	//ioctl(0, TIOCSTI, text);
@@ -76,7 +74,7 @@ func terminalHistory() {
 			//fmt.Fprintf(screen, "\033[%d;%dH", x, y)
 
 			//create a C string (!)
-			cstr := C.CString("zdb -list")
+			cstr := C.CString(selectedEntry)
 			defer C.free(unsafe.Pointer(cstr))
 
 			C.tw(cstr)

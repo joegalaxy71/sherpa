@@ -6,29 +6,37 @@ import (
 	_ "strings"
 	"time"
 
-	//#include <stdio.h>
-	//#include <fcntl.h>
-	//#include <termios.h>
+	"github.com/k0kubun/go-ansi"
+
 	//#include <sys/ioctl.h>
-	//#include <unistd.h>
+	//#include <sgtty.h>
 	//
 	//void tw() {
-	//int fd;
-	//char *term = "/dev/ttys005";
-	//char *text = "ok";
+	//char *text = "zpool list";
 	//
-	//fd = open(term, O_RDONLY);
-	//if (fd < 0) {
-	//perror(term);
-	//perror("could not open tty");
-	//}
 	//
 	//while (*text) {
-	//if (ioctl(fd, TIOCSTI, text)) {
-	//perror("ioctl");
-	//}
+	//ioctl(0, TIOCSTI, text);
+	//
 	//text++;
+	//
 	//}
+	//}
+	//
+	//void echo_off()
+	//{
+	//struct sgttyb state;
+	//(void)ioctl(0, (int)TIOCGETP, (char *)&state);
+	//state.sg_flags &= ~ECHO;
+	//(void)ioctl(0, (int)TIOCSETP, (char *)&state);
+	//}
+	//
+	//void echo_on()
+	//{
+	//struct sgttyb state;
+	//(void)ioctl(0, (int)TIOCGETP, (char *)&state);
+	//state.sg_flags |= ECHO;
+	//(void)ioctl(0, (int)TIOCSETP, (char *)&state);
 	//}
 	"C"
 
@@ -77,7 +85,13 @@ func terminalHistory() {
 		SetDoneFunc(func(key tcell.Key) {
 			app.Stop()
 
+			//C.echo_off()
+
+			//fmt.Fprintf(screen, "\033[%d;%dH", x, y)
+
 			C.tw()
+			ansi.EraseInLine(2)
+			ansi.CursorNextLine(0)
 
 		})
 

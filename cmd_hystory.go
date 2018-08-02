@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	_ "strings"
 	"time"
 	"unsafe"
@@ -86,7 +87,7 @@ func terminalHistory() {
 
 	// text (separator)
 	text := tview.NewTextView().SetDynamicColors(true)
-	fmt.Fprintf(text, "[gray]Type to filter, UP/DOWN to move, TAB to select and paste after prompt, C-g to cancel")
+	fmt.Fprintf(text, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
 
 	// table (history list)
 	entries = tview.NewTable().SetBorders(false)
@@ -121,9 +122,16 @@ func updateList(changed string) {
 		entries.Clear()
 
 		for i, entry := range res.HistoryEntries {
-			entries.SetCell(i, 0, tview.NewTableCell(entry.Entry).SetAlign(tview.AlignLeft))
+			colorized := colorize(entry.Entry, req.Req)
+			entries.SetCell(i, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
 			//log.Debugf("i=%s", i)
 		}
 	}
 	app.Draw()
+}
+
+func colorize(entry, req string) string {
+	const color = "[white]"
+	colorized := strings.Replace(entry, req, color+req+"[-]", -1)
+	return colorized
 }

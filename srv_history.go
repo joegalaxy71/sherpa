@@ -18,7 +18,6 @@ import (
 
 const HISTORY_FILE = "/Users/simo/.bash_history"
 
-var he []string //history entries
 var watcher *fsnotify.Watcher
 
 func historyInit() error {
@@ -37,7 +36,7 @@ func historyServe(req request) response {
 	var res response
 	var entries []HistoryEntry
 
-	db.Limit(5).Where("entry LIKE ?", "%"+req.Req+"%").Find(&entries)
+	db.Limit(40).Where("entry LIKE ?", "%"+req.Req+"%").Find(&entries)
 
 	res.HistoryEntries = entries
 

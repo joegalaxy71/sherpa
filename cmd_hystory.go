@@ -120,8 +120,8 @@ func updateList(changed string) {
 		// delete all entries
 		entries.Clear()
 
-		for i, entry := range res.List {
-			entries.SetCell(i, 0, tview.NewTableCell(entry).SetAlign(tview.AlignLeft))
+		for i, entry := range res.HistoryEntries {
+			entries.SetCell(i, 0, tview.NewTableCell(entry.Entry).SetAlign(tview.AlignLeft))
 			//log.Debugf("i=%s", i)
 		}
 	}

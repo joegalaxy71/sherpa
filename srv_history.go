@@ -35,13 +35,11 @@ func historyServe(req request) response {
 	log.Noticef("Searched: %s", req.Req)
 
 	var res response
+	var entries []HistoryEntry
 
-	for _, entry := range he {
-		if strings.Contains(entry, req.Req) {
-			// actual work done
-			res.List = append(res.List, entry)
-		}
-	}
+	db.Limit(5).Where("entry LIKE ?", "%"+req.Req+"%").Find(&entries)
+
+	res.HistoryEntries = entries
 
 	return res
 }
@@ -201,7 +199,7 @@ func updateEntriesDB() error {
 	for _, entry := range inputStrings {
 		if entry != "" {
 			var temp HistoryEntry
-			log.Debugf("entry=%s, host=%s", entry, "retina")
+			//log.Debugf("entry=%s, host=%s", entry, "retina")
 			db.FirstOrCreate(&temp, HistoryEntry{Entry: entry, Host: "retina"})
 		}
 	}

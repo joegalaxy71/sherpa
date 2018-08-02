@@ -20,9 +20,10 @@ type request struct {
 }
 
 type response struct {
-	Res     string
-	List    []string
-	Prompts []prompt
+	Res            string
+	List           []string
+	Prompts        []prompt
+	HistoryEntries []HistoryEntry
 }
 
 //REMEMBER ALWAYS

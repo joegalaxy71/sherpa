@@ -50,9 +50,9 @@ func init() {
 	db.AutoMigrate(&Status{})
 
 	//create a Status record if it doesn't exist
-	db.FirstOrCreate(&Status{}, Status{One: "one"})
+	db.FirstOrCreate(&status, Status{One: "one"})
 
-	db.Where("One = ?", "one").First(&status)
+	//db.Where("One = ?", "one").First(&status)
 
 	//log.Noticef("DB after init= %+v", db)
 
@@ -95,11 +95,11 @@ func main() {
 	}
 
 	var cmdTest = &cobra.Command{
-		Use:   "test",
+		Use:   "debug",
 		Short: "This is here only for debug purposes",
-		Long:  "Sherpa test is used to test experimental functions and facilities, do not invoke, should be disabled.",
+		Long:  "Sherpa debug is used to test experimental functions and facilities, do not invoke, should be disabled.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   testClient,
+		Run:   debugClient,
 	}
 
 	/// example commands
@@ -129,7 +129,7 @@ func main() {
 	cmdTimes.Flags().IntVarP(&echoTimes, "times", "t", 1, "times to echo the input")
 
 	var rootCmd = &cobra.Command{Use: "app"}
-	rootCmd.AddCommand(cmdEcho, cmdHistory, cmdPrompt, cmdDaemonize)
+	rootCmd.AddCommand(cmdEcho, cmdHistory, cmdPrompt, cmdTest, cmdDaemonize)
 	cmdEcho.AddCommand(cmdTimes)
 	rootCmd.Execute()
 

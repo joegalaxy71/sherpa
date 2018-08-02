@@ -198,11 +198,11 @@ func updateEntriesDB() error {
 	// no need to sort (it's a db work) or remove duplicates (they're needed)
 	// write them to the db
 
-	var temp HistoryEntry
 	for _, entry := range inputStrings {
 		if entry != "" {
-			log.Debugf("entry=%s\nhost=%s", entry, "retina")
-			db.FirstOrInit(&temp, HistoryEntry{Entry: entry, Host: "retina"})
+			var temp HistoryEntry
+			log.Debugf("entry=%s, host=%s", entry, "retina")
+			db.FirstOrCreate(&temp, HistoryEntry{Entry: entry, Host: "retina"})
 		}
 	}
 

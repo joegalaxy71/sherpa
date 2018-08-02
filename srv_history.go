@@ -10,7 +10,6 @@ import (
 	_ "errors"
 	_ "fmt"
 	"os"
-	"sort"
 	"strings"
 	// "time"
 
@@ -91,6 +90,9 @@ func watchHistory() {
 		}
 	}()
 
+	//we launch manually the first db update
+	updateEntriesDB()
+
 	err = watcher.Add(HISTORY_FILE)
 	if err != nil {
 		log.Error(err)
@@ -119,26 +121,26 @@ func updateEntriesDB() error {
 	// 2 = End of file
 	var whence = 0
 
-	var chunk uint32 = 0
-	var readFrom uint32 = 0
+	var chunk int64
+	var readFrom int64
 
 	//check if size is bigger that the read part or
 	if status.HistFrom == 0 {
 		log.Noticef("history file never read before")
 		// the chunk we read == file size (real all file)
-		chunk = uint32(size)
+		chunk = size
 		readFrom = 0
-	} else if uint32(size) < status.HistFrom {
+	} else if size < status.HistFrom {
 		//if read part = 0 (never read before)
 		log.Noticef("history file size < of part already read, reading whole file")
 		// the chunk we read == file size (real all file)
-		chunk = uint32(size)
+		chunk = size
 		readFrom = 0
 	} else {
 		//calculate chunk to read
 		log.Noticef("history file size > of part already read, reading delta")
 
-		chunk = uint32(size) - status.HistFrom
+		chunk = size - status.HistFrom
 		readFrom = status.HistFrom
 
 	}
@@ -164,16 +166,21 @@ func updateEntriesDB() error {
 		return err
 	}
 
+	s := string(byteSlice[:])
+
+	log.Warningf("Read: %s", s)
 	// update status whit the info about the new read part
-	status.HistFrom = uint32(size)
+	status.HistFrom = size
 
 	//always keep the status in a global var
 
-	db.First(&status, "one = ?", "one")
+	//db.First(&status, "one = ?", "one")
 
-	db.Model(&status).Update("HistFrom", uint32(size))
+	//db.Model(&status).Update("HistFrom", uint32(size))
 
-	//db.Save(&status)
+	//status.HistFrom = size
+
+	db.Save(&status)
 
 	//log.Noticef("%+v", db)
 
@@ -181,10 +188,23 @@ func updateEntriesDB() error {
 
 	// typecats to string, then split by newline into a []string
 	inputStrings := strings.Split(string(byteSlice), "\n")
+	log.Debugf("inputstsrings len()=%v, cap()=%v", len(inputStrings), cap(inputStrings))
+
 	// remove duplicates
-	he = unique(inputStrings)
+	//he = unique(inputStrings)
 	// sort them
-	sort.Sort(sort.StringSlice(he))
+	//sort.Sort(sort.StringSlice(he))
+
+	// no need to sort (it's a db work) or remove duplicates (they're needed)
+	// write them to the db
+
+	var temp HistoryEntry
+	for _, entry := range inputStrings {
+		if entry != "" {
+			log.Debugf("entry=%s\nhost=%s", entry, "retina")
+			db.FirstOrInit(&temp, HistoryEntry{Entry: entry, Host: "retina"})
+		}
+	}
 
 	//fmt.Printf("%s took %v\n", time.Since(start))
 

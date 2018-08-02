@@ -88,10 +88,18 @@ func main() {
 
 	var cmdPrompt = &cobra.Command{
 		Use:   "prompt",
-		Short: "Allowa to inspect prompts and/or change the current prompt",
+		Short: "Allows to inspect prompts and/or change the current prompt",
 		Long:  "Sherpa mantains an updated list of prompts. This commands let you see the list and change your prompt.",
 		Args:  cobra.MinimumNArgs(0),
 		Run:   promptClient,
+	}
+
+	var cmdTest = &cobra.Command{
+		Use:   "test",
+		Short: "This is here only for debug purposes",
+		Long:  "Sherpa test is used to test experimental functions and facilities, do not invoke, should be disabled.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   testClient,
 	}
 
 	/// example commands

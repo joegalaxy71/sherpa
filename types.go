@@ -38,10 +38,11 @@ type prompt struct {
 type HistoryEntry struct {
 	gorm.Model
 	Entry string
+	Host  string
 }
 
 type Status struct {
 	gorm.Model
 	One      string `gorm:"default:'one'"`
-	HistFrom uint32 `gorm:"default:'0'"`
+	HistFrom int64  `gorm:"default:'0'"`
 }

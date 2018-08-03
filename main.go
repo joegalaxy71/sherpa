@@ -43,6 +43,7 @@ func init() {
 		panic("failed to connect database")
 	}
 
+	// assign connection to global var
 	db = dbconn
 
 	// Migrate the schema

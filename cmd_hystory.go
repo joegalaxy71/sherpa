@@ -51,7 +51,7 @@ func historyClient(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	log.Infof("reached history\n")
+	log.Infof("reached history---damn\n")
 	log.Infof("Parent pid:%v", os.Getppid())
 
 	initNATSClient()
@@ -65,11 +65,12 @@ func terminalHistory() {
 	app = tview.NewApplication()
 
 	//inputfield (history incremental partial match prompt)
-	inputField := tview.NewInputField().SetLabel("[red]user@host#").SetChangedFunc(updateList).SetDoneFunc(stopAppAndReturnSelected).SetInputCapture(tabToSwitch)
+	inputField := tview.NewInputField().SetLabel("[red]user@host#").SetChangedFunc(updateList).SetDoneFunc(stopAppAndReturnSelected)
+	inputField.SetInputCapture(tabToSwitch)
 
 	// text (separator)
 	text := tview.NewTextView().SetDynamicColors(true)
-	fmt.Fprintf(text, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
+	fmt.Fprintf(text, "[green]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
 
 	// table (history list)
 	entries = tview.NewTable().SetBorders(false).SetDoneFunc(stopAppAndReturnSelected)
@@ -80,7 +81,7 @@ func terminalHistory() {
 		AddItem(entries, 0, 1, false)
 
 	// run flex
-	focused = inputField
+	//focused = inputField
 	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
 		panic(err)
 	}
@@ -135,7 +136,12 @@ func stopAppAndReturnSelected(key tcell.Key) {
 }
 
 func tabToSwitch(key *tcell.EventKey) *tcell.EventKey {
-	log.Infof("event=%+v", key)
-
+	log.Debug("reached tabToSwitch")
+	//app.Stop()
+	//panic("Tabtosvitch")
+	//log.Infof("event=%+v", key.)
+	if key.Key() == tcell.KeyBacktab {
+		app.SetFocus(entries)
+	}
 	return key
 }

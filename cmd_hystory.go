@@ -31,6 +31,7 @@ import (
 	//"github.com/kr/pty"
 )
 
+var inputField *tview.InputField
 var entries *tview.Table
 var app *tview.Application
 var selectedEntry string
@@ -65,23 +66,23 @@ func terminalHistory() {
 	app = tview.NewApplication()
 
 	//inputfield (history incremental partial match prompt)
-	inputField := tview.NewInputField().SetLabel("[red]user@host#").SetChangedFunc(updateList).SetDoneFunc(stopAppAndReturnSelected)
-	inputField.SetInputCapture(tabToSwitch)
+	inputField = tview.NewInputField().SetLabel("[red]user@host#").SetChangedFunc(updateList)
+	inputField.SetInputCapture(interceptInputField)
 
 	// text (separator)
 	text := tview.NewTextView().SetDynamicColors(true)
 	fmt.Fprintf(text, "[green]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
 
 	// table (history list)
-	entries = tview.NewTable().SetBorders(false).SetDoneFunc(stopAppAndReturnSelected)
-
+	entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)
 	entries.SetCell(0, 0, tview.NewTableCell("start typing to populate list...").SetAlign(tview.AlignLeft))
+	entries.SetInputCapture(interceptTable)
 
+	// flex
 	flex := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(inputField, 1, 1, true).AddItem(text, 1, 1, false).
 		AddItem(entries, 0, 1, false)
 
 	// run flex
-	//focused = inputField
 	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
 		panic(err)
 	}
@@ -135,13 +136,18 @@ func stopAppAndReturnSelected(key tcell.Key) {
 	ansi.CursorNextLine(0)
 }
 
-func tabToSwitch(key *tcell.EventKey) *tcell.EventKey {
-	log.Debug("reached tabToSwitch")
-	//app.Stop()
-	//panic("Tabtosvitch")
-	//log.Infof("event=%+v", key.)
-	if key.Key() == tcell.KeyBacktab {
+func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
+	//log.Debug("reached tabToSwitch")
+	if key.Key() == tcell.KeyTab {
 		app.SetFocus(entries)
+	}
+	return key
+}
+
+func interceptTable(key *tcell.EventKey) *tcell.EventKey {
+	//log.Debug("reached interceptTable")
+	if key.Key() == tcell.KeyTab {
+		app.SetFocus(inputField)
 	}
 	return key
 }

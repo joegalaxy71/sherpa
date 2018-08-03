@@ -34,6 +34,7 @@ import (
 var entries *tview.Table
 var app *tview.Application
 var selectedEntry string
+var focused *tview.Box
 
 func historyClient(cmd *cobra.Command, args []string) {
 
@@ -64,42 +65,22 @@ func terminalHistory() {
 	app = tview.NewApplication()
 
 	//inputfield (history incremental partial match prompt)
-	inputField := tview.NewInputField().
-		SetLabel("[red]user@host#").
-		SetChangedFunc(updateList).
-		SetDoneFunc(func(key tcell.Key) {
-			app.Stop()
-
-			//C.echo_off()
-
-			//fmt.Fprintf(screen, "\033[%d;%dH", x, y)
-
-			//create a C string (!)
-			cstr := C.CString(selectedEntry)
-			defer C.free(unsafe.Pointer(cstr))
-
-			C.tw(cstr)
-
-			ansi.EraseInLine(2)
-			ansi.CursorNextLine(0)
-
-		})
+	inputField := tview.NewInputField().SetLabel("[red]user@host#").SetChangedFunc(updateList).SetDoneFunc(stopAppAndReturnSelected).SetInputCapture(tabToSwitch)
 
 	// text (separator)
 	text := tview.NewTextView().SetDynamicColors(true)
 	fmt.Fprintf(text, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
 
 	// table (history list)
-	entries = tview.NewTable().SetBorders(false)
+	entries = tview.NewTable().SetBorders(false).SetDoneFunc(stopAppAndReturnSelected)
 
 	entries.SetCell(0, 0, tview.NewTableCell("start typing to populate list...").SetAlign(tview.AlignLeft))
 
-	flex := tview.NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(inputField, 1, 1, true).
-		AddItem(text, 1, 1, false).
+	flex := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(inputField, 1, 1, true).AddItem(text, 1, 1, false).
 		AddItem(entries, 0, 1, false)
 
+	// run flex
+	focused = inputField
 	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
 		panic(err)
 	}
@@ -134,4 +115,27 @@ func colorize(entry, req string) string {
 	const color = "[white]"
 	colorized := strings.Replace(entry, req, color+req+"[-]", -1)
 	return colorized
+}
+
+func stopAppAndReturnSelected(key tcell.Key) {
+	app.Stop()
+
+	//C.echo_off()
+
+	//fmt.Fprintf(screen, "\033[%d;%dH", x, y)
+
+	//create a C string (!)
+	cstr := C.CString(selectedEntry)
+	defer C.free(unsafe.Pointer(cstr))
+
+	C.tw(cstr)
+
+	ansi.EraseInLine(2)
+	ansi.CursorNextLine(0)
+}
+
+func tabToSwitch(key *tcell.EventKey) *tcell.EventKey {
+	log.Infof("event=%+v", key)
+
+	return key
 }

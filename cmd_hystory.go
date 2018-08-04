@@ -119,7 +119,7 @@ func colorize(entry, req string) string {
 	return colorized
 }
 
-func stopAppAndReturnSelected(key tcell.Key) {
+func stopAppAndReturnSelected(selected string) {
 	app.Stop()
 
 	//C.echo_off()
@@ -127,7 +127,7 @@ func stopAppAndReturnSelected(key tcell.Key) {
 	//fmt.Fprintf(screen, "\033[%d;%dH", x, y)
 
 	//create a C string (!)
-	cstr := C.CString(selectedEntry)
+	cstr := C.CString(selected)
 	defer C.free(unsafe.Pointer(cstr))
 
 	C.tw(cstr)
@@ -143,6 +143,8 @@ func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 		app.SetFocus(entries)
 	case tcell.KeyBacktab:
 		app.SetFocus(entries)
+	case tcell.KeyEnter:
+		stopAppAndReturnSelected(inputField.GetText())
 	}
 	return key
 }
@@ -154,6 +156,9 @@ func interceptTable(key *tcell.EventKey) *tcell.EventKey {
 		app.SetFocus(inputField)
 	case tcell.KeyBacktab:
 		app.SetFocus(inputField)
+	case tcell.KeyEnter:
+		r, c := entries.GetSelection()
+		stopAppAndReturnSelected(entries.GetCell(r, c).Text)
 	}
 
 	return key

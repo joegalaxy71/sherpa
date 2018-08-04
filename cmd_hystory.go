@@ -138,7 +138,10 @@ func stopAppAndReturnSelected(key tcell.Key) {
 
 func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 	//log.Debug("reached tabToSwitch")
-	if key.Key() == tcell.KeyTab {
+	switch key.Key() {
+	case tcell.KeyTAB:
+		app.SetFocus(entries)
+	case tcell.KeyBacktab:
 		app.SetFocus(entries)
 	}
 	return key
@@ -146,8 +149,12 @@ func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 
 func interceptTable(key *tcell.EventKey) *tcell.EventKey {
 	//log.Debug("reached interceptTable")
-	if key.Key() == tcell.KeyTab {
+	switch key.Key() {
+	case tcell.KeyTAB:
+		app.SetFocus(inputField)
+	case tcell.KeyBacktab:
 		app.SetFocus(inputField)
 	}
+
 	return key
 }

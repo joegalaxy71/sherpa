@@ -34,7 +34,6 @@ import (
 var inputField *tview.InputField
 var entries *tview.Table
 var app *tview.Application
-var selectedEntry string
 var focused *tview.Box
 
 func historyClient(cmd *cobra.Command, args []string) {
@@ -71,7 +70,7 @@ func terminalHistory() {
 
 	// text (separator)
 	text := tview.NewTextView().SetDynamicColors(true)
-	fmt.Fprintf(text, "[green]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
+	fmt.Fprintf(text, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
 
 	// table (history list)
 	entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)
@@ -89,8 +88,6 @@ func terminalHistory() {
 }
 
 func updateList(changed string) {
-
-	selectedEntry = changed
 
 	// Requests
 	var res response
@@ -145,6 +142,8 @@ func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 		app.SetFocus(entries)
 	case tcell.KeyEnter:
 		stopAppAndReturnSelected(inputField.GetText())
+	case tcell.KeyEsc:
+		app.Stop()
 	}
 	return key
 }
@@ -159,6 +158,8 @@ func interceptTable(key *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyEnter:
 		r, c := entries.GetSelection()
 		stopAppAndReturnSelected(entries.GetCell(r, c).Text)
+	case tcell.KeyEsc:
+		app.Stop()
 	}
 
 	return key

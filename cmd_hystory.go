@@ -65,7 +65,7 @@ func terminalHistory() {
 	app = tview.NewApplication()
 
 	//inputfield (history incremental partial match prompt)
-	inputField = tview.NewInputField().SetLabel("[white]user@[green]host#").SetChangedFunc(updateList)
+	inputField = tview.NewInputField().SetLabel("[white]" + userName + "@[green]" + hostName + "#").SetChangedFunc(updateList)
 	inputField.SetInputCapture(interceptInputField)
 
 	// text (separator)

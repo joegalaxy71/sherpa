@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"os/user"
 	"strings"
 	"sync"
 	"syscall"
@@ -24,8 +25,24 @@ var log *logging.Logger
 var ec *nats.EncodedConn
 var db *gorm.DB
 var status Status
+var hostName string
+var currentUser *user.User
+var userName string
 
 func init() {
+	// get hostname and user
+	var err error
+	hostName, err = os.Hostname()
+	if err != nil {
+		panic(err)
+	}
+	currentUser, err = user.Current()
+	if err != nil {
+		panic(err)
+	}
+
+	userName = currentUser.Username
+
 	// logging
 	log = logging.MustGetLogger("example")
 	backend1 := logging.NewLogBackend(os.Stderr, "", 0)

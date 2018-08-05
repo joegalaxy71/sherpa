@@ -36,7 +36,7 @@ func historyServe(req request) response {
 	var res response
 	var entries []HistoryEntry
 
-	db.Limit(40).Where("entry LIKE ?", "%"+req.Req+"%").Find(&entries)
+	db.Limit(30).Where("entry LIKE ?", "%"+req.Req+"%").Find(&entries)
 
 	res.HistoryEntries = entries
 

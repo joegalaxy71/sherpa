@@ -70,7 +70,7 @@ func terminalHistory() {
 
 	// text (separator)
 	text := tview.NewTextView().SetDynamicColors(true)
-	fmt.Fprintf(text, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, C-g cancel")
+	fmt.Fprintf(text, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, ESC cancel")
 
 	// table (history list)
 	entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)
@@ -104,7 +104,7 @@ func updateList(changed string) {
 		// add header row
 		entries.SetCell(0, 0, tview.NewTableCell("[green]COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
 		entries.SetCell(0, 1, tview.NewTableCell("[green]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
-		entries.SetCell(0, 2, tview.NewTableCell("[green]HOST").SetAlign(tview.AlignRight).SetSelectable(false))
+		entries.SetCell(0, 2, tview.NewTableCell("[green]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
 
 		for i, entry := range res.HistoryEntries {
 			colorized := colorize(entry.Entry, req.Req)
@@ -118,7 +118,7 @@ func updateList(changed string) {
 }
 
 func colorize(entry, req string) string {
-	const color = "[white]"
+	const color = "[navy]"
 	colorized := strings.Replace(entry, req, color+req+"[-]", -1)
 	return colorized
 }

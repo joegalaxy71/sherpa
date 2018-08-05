@@ -64,7 +64,7 @@ func terminalHistory() {
 	app = tview.NewApplication()
 
 	//inputfield (history incremental partial match prompt)
-	inputField = tview.NewInputField().SetLabel("[red]user@host#").SetChangedFunc(updateList)
+	inputField = tview.NewInputField().SetLabel("[white]user@[green]host#").SetChangedFunc(updateList)
 	inputField.SetInputCapture(interceptInputField)
 
 	// text (separator)
@@ -101,15 +101,15 @@ func updateList(changed string) {
 		entries.Clear()
 
 		// add header row
-		entries.SetCell(0, 0, tview.NewTableCell("COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
-		entries.SetCell(0, 1, tview.NewTableCell("TIME").SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray).SetSelectable(false))
-		entries.SetCell(0, 2, tview.NewTableCell("HOST").SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige).SetSelectable(false))
+		entries.SetCell(0, 0, tview.NewTableCell("[green]COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
+		entries.SetCell(0, 1, tview.NewTableCell("[green]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
+		entries.SetCell(0, 2, tview.NewTableCell("[green]HOST").SetAlign(tview.AlignRight).SetSelectable(false))
 
 		for i, entry := range res.HistoryEntries {
 			colorized := colorize(entry.Entry, req.Req)
 			entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
-			entries.SetCell(i+1, 1, tview.NewTableCell(entry.CreatedAt.Format("2006-01-02T15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
-			entries.SetCell(i+1, 2, tview.NewTableCell(entry.Host).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
+			entries.SetCell(i+1, 1, tview.NewTableCell("[blue]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
+			entries.SetCell(i+1, 2, tview.NewTableCell("[blue]"+entry.Host).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
 			//log.Debugf("i=%s", i)
 		}
 	}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	_ "strings"
 	"time"
@@ -51,8 +50,8 @@ func historyClient(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	log.Infof("reached history---damn\n")
-	log.Infof("Parent pid:%v", os.Getppid())
+	log.Infof("reached historyClient")
+	//log.Infof("Parent pid:%v", os.Getppid())
 
 	initNATSClient()
 
@@ -104,6 +103,8 @@ func updateList(changed string) {
 		for i, entry := range res.HistoryEntries {
 			colorized := colorize(entry.Entry, req.Req)
 			entries.SetCell(i, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
+			entries.SetCell(i, 1, tview.NewTableCell(entry.CreatedAt.String()).SetAlign(tview.AlignCenter))
+			entries.SetCell(i, 2, tview.NewTableCell(entry.Host).SetAlign(tview.AlignRight))
 			//log.Debugf("i=%s", i)
 		}
 	}

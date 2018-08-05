@@ -34,6 +34,7 @@ var inputField *tview.InputField
 var entries *tview.Table
 var app *tview.Application
 var focused *tview.Box
+var res response
 
 func historyClient(cmd *cobra.Command, args []string) {
 
@@ -89,7 +90,7 @@ func terminalHistory() {
 func updateList(changed string) {
 
 	// Requests
-	var res response
+	//var res response
 	var req request
 	req.Req = changed
 
@@ -162,8 +163,11 @@ func interceptTable(key *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyBacktab:
 		app.SetFocus(inputField)
 	case tcell.KeyEnter:
-		r, c := entries.GetSelection()
-		stopAppAndReturnSelected(entries.GetCell(r, c).Text)
+		r, _ := entries.GetSelection()
+		//stopAppAndReturnSelected(entries.GetCell(r, c).Text)
+		// we subtract 1 because array[] starts at 0, column at 1
+		// and another because there's a header row @ position 0
+		stopAppAndReturnSelected(res.HistoryEntries[r-1].Entry)
 	case tcell.KeyEsc:
 		app.Stop()
 	}

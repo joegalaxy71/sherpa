@@ -64,14 +64,14 @@ func terminalHistory() {
 
 	app = tview.NewApplication()
 
-	//inputfield (history incremental partial match prompt)
-	inputField = tview.NewInputField().SetLabel("[white]" + userName + "@[green]" + hostName + "#").SetChangedFunc(updateList)
-	inputField.SetInputCapture(interceptInputField)
-	inputField.SetBorder(true)
-
 	// text (separator)
 	help := tview.NewTextView().SetDynamicColors(true)
 	fmt.Fprintf(help, "[white]sherpa [red]history [gray] <<Search in all machine's history>> ? = help")
+
+	//inputfield (history incremental partial match prompt)
+	inputField = tview.NewInputField().SetLabel("[white]isearch ").SetChangedFunc(updateList)
+	inputField.SetInputCapture(interceptInputField)
+	inputField.SetBorder(true)
 
 	// table (history list)
 	entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)

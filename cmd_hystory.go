@@ -67,10 +67,11 @@ func terminalHistory() {
 	//inputfield (history incremental partial match prompt)
 	inputField = tview.NewInputField().SetLabel("[white]" + userName + "@[green]" + hostName + "#").SetChangedFunc(updateList)
 	inputField.SetInputCapture(interceptInputField)
+	inputField.SetBorder(true)
 
 	// text (separator)
 	help := tview.NewTextView().SetDynamicColors(true)
-	fmt.Fprintf(help, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, ESC cancel")
+	fmt.Fprintf(help, "[white]sherpa [red]history [gray] <<Search in all machine's history>> ? = help")
 
 	// table (history list)
 	entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)
@@ -80,8 +81,8 @@ func terminalHistory() {
 	// flex
 	flex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(help, 1, 1, false).
-		AddItem(inputField, 1, 1, true).
-		AddItem(entries, 0, 1, false)
+		AddItem(inputField, 3, 1, true).
+		AddItem(entries, 0, 6, false)
 
 	// run flex
 	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
@@ -90,7 +91,6 @@ func terminalHistory() {
 }
 
 func updateList(changed string) {
-
 	// Requests
 	//var res response
 	var req request

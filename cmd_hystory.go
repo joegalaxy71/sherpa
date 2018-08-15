@@ -104,15 +104,15 @@ func updateList(changed string) {
 		entries.Clear()
 
 		// add header row
-		entries.SetCell(0, 0, tview.NewTableCell("[green]COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
-		entries.SetCell(0, 1, tview.NewTableCell("[green]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
-		entries.SetCell(0, 2, tview.NewTableCell("[green]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
+		entries.SetCell(0, 0, tview.NewTableCell("[white]COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
+		entries.SetCell(0, 1, tview.NewTableCell("[white]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
+		entries.SetCell(0, 2, tview.NewTableCell("[white]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
 
 		for i, entry := range res.HistoryEntries {
 			colorized := colorize(entry.Entry, req.Req)
 			entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
-			entries.SetCell(i+1, 1, tview.NewTableCell("[blue]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
-			entries.SetCell(i+1, 2, tview.NewTableCell("[blue]"+entry.Host).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
+			entries.SetCell(i+1, 1, tview.NewTableCell("[red]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
+			entries.SetCell(i+1, 2, tview.NewTableCell("[red]"+entry.Host).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
 			//log.Debugf("i=%s", i)
 		}
 	}
@@ -120,7 +120,7 @@ func updateList(changed string) {
 }
 
 func colorize(entry, req string) string {
-	const color = "[navy]"
+	const color = "[red]"
 	colorized := strings.Replace(entry, req, color+req+"[-]", -1)
 	return colorized
 }

@@ -51,7 +51,7 @@ func historyClient(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	log.Infof("reached historyClient")
+	//log.Infof("reached historyClient")
 	//log.Infof("Parent pid:%v", os.Getppid())
 
 	initNATSClient()
@@ -69,16 +69,18 @@ func terminalHistory() {
 	inputField.SetInputCapture(interceptInputField)
 
 	// text (separator)
-	text := tview.NewTextView().SetDynamicColors(true)
-	fmt.Fprintf(text, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, ESC cancel")
+	help := tview.NewTextView().SetDynamicColors(true)
+	fmt.Fprintf(help, "[gray]Type to filter, TAB changes focus, UP/DOWN moves, ENTER pastes after prompt, ESC cancel")
 
 	// table (history list)
 	entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)
 	entries.SetCell(0, 0, tview.NewTableCell("start typing to populate list...").SetAlign(tview.AlignLeft))
-	entries.SetInputCapture(interceptTable)
+	entries.SetInputCapture(interceptTable).SetBorder(true)
 
 	// flex
-	flex := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(inputField, 1, 1, true).AddItem(text, 1, 1, false).
+	flex := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(help, 1, 1, false).
+		AddItem(inputField, 1, 1, true).
 		AddItem(entries, 0, 1, false)
 
 	// run flex

@@ -16,7 +16,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const HISTORY_FILE = "/Users/simo/.bash_history"
+const HISTORY_FILE = "/root/.bash_history"
 
 var watcher *fsnotify.Watcher
 

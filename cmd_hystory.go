@@ -96,7 +96,7 @@ func updateList(changed string) {
 	var req request
 	req.Req = changed
 
-	err := ec.Request("history", req, &res, 100*time.Millisecond)
+	err := ec.Request("history", req, &res, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {

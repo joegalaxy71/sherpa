@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"os/user"
+	"path/filepath"
 	"strings"
 	"sync"
 	"syscall"
@@ -18,7 +19,6 @@ import (
 )
 
 // globals
-const DBFILE = "/Users/simo/go/bin/test.db"
 
 var wg sync.WaitGroup
 var log *logging.Logger
@@ -28,10 +28,19 @@ var status Status
 var hostName string
 var currentUser *user.User
 var userName string
+var DBFILE string
 
 func init() {
-	// get hostname and user
 	var err error
+
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+	DBFILE = exPath + "/test.db"
+
+	// get hostname and user
 	hostName, err = os.Hostname()
 	if err != nil {
 		panic(err)
@@ -43,7 +52,7 @@ func init() {
 
 	userName = currentUser.Username
 
-	// logging
+	// loggingragazzi,
 	log = logging.MustGetLogger("example")
 	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
 	backend2 := logging.NewLogBackend(os.Stderr, "", 0)

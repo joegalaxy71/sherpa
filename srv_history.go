@@ -10,17 +10,39 @@ import (
 	_ "errors"
 	_ "fmt"
 	"os"
+	"os/user"
 	"strings"
+	//"runtime"
 	// "time"
 
 	"github.com/fsnotify/fsnotify"
 )
 
-const HISTORY_FILE = "/root/.bash_history"
-
+//const HISTORY_FILE = "/root/.bash_history"
+var HISTORY_FILE string
 var watcher *fsnotify.Watcher
 
 func historyInit() error {
+
+	currUser, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	homedir := currUser.HomeDir
+
+	HISTORY_FILE = homedir + "/.bash_history"
+
+	/*	switch runtime.GOOS {
+		case "darwin":
+			HISTORY_FILE = homedir + "/.bash_history"
+		case "linux":
+			if currUser == "root" {
+				HISTORY_FILE = homedir + "/.bash_history"
+			} else {
+				HISTORY_FILE = homedir + "/.bash_history"
+			}
+		}*/
 
 	go watchHistory()
 
@@ -163,9 +185,9 @@ func updateEntriesDB() error {
 		return err
 	}
 
-	s := string(byteSlice[:])
+	//s := string(byteSlice[:])
 
-	log.Warningf("Read: %s", s)
+	//log.Warningf("Read: %s", s)
 	// update status whit the info about the new read part
 	status.HistFrom = size
 

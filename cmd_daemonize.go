@@ -72,7 +72,6 @@ func initMicroServer(us microServer) error {
 		func(subj, reply string, req *request) {
 			log.Noticef("Received an cleanup order on subject %s! %+v\n", subj, req)
 			log.Noticef("%s subserver: cleanup started\n", us.name)
-			subscription.Unsubscribe()
 			err := us.cleanup()
 			if err != nil {
 				log.Noticef("%s subserver: cleanup completed\n", us.name)
@@ -80,6 +79,8 @@ func initMicroServer(us microServer) error {
 				log.Warningf("%s subserver: cleanup failed\n")
 			}
 		})
+
+	defer subscription.Unsubscribe()
 
 	return nil
 }

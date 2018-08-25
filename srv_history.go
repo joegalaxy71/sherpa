@@ -184,11 +184,6 @@ func updateEntriesDB() error {
 	inputStrings := strings.Split(string(byteSlice), "\n")
 	log.Debugf("inputstsrings len()=%v, cap()=%v", len(inputStrings), cap(inputStrings))
 
-	// remove duplicates
-	//he = unique(inputStrings)
-	// sort them
-	//sort.Sort(sort.StringSlice(he))
-
 	// no need to sort (it's a db work) or remove duplicates (they're needed)
 	// write them to the db
 
@@ -196,8 +191,8 @@ func updateEntriesDB() error {
 		if entry != "" {
 			//log.Debugf("entry=%s, host=%s", entry, "retina")
 
-			var he historyEntry
-			he.Account = 0
+			var he historyNew
+			he.Account = "account"
 			he.Entry = entry
 			he.UserAtHost = "root@host"
 

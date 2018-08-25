@@ -17,10 +17,10 @@ type historyQuery struct {
 }
 
 type historyResults struct {
-	HistoryEntries []historyEntry
+	HistoryEntries []HistoryEntry
 }
 
-type historyEntry struct {
+type historyNew struct {
 	Account    string
 	Entry      string
 	UserAtHost string

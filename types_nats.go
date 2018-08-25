@@ -21,7 +21,7 @@ type historyResults struct {
 }
 
 type historyEntry struct {
-	Account    int64
+	Account    string
 	Entry      string
 	UserAtHost string
 	CreatedAt  time.Time

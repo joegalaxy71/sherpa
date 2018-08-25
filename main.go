@@ -23,6 +23,7 @@ import (
 var wg sync.WaitGroup
 var log *logging.Logger
 var ec *nats.EncodedConn
+var cec *nats.EncodedConn // cloud encoded connection
 var db *gorm.DB
 var status Status
 var hostName string
@@ -73,7 +74,6 @@ func init() {
 	db = dbconn
 
 	// Migrate the schema
-	db.AutoMigrate(&HistoryEntry{})
 	db.AutoMigrate(&Status{})
 
 	//create a Status record if it doesn't exist
@@ -179,7 +179,7 @@ func cleanup(c chan os.Signal) {
 			fmt.Printf("Request failed: %v\n", err)
 		}*/
 
-	log.Noticef("Cleanup: awaiting 1secs for subservers cleanup")
+	log.Noticef("Cleanup: waiting 1 sec for subservers cleanup")
 	// give everyone globally 10 second to clean up everything
 	time.Sleep(1000000000)
 

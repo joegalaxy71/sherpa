@@ -33,3 +33,19 @@ func initNATSClient() error {
 
 	return nil
 }
+
+func initNATSCloudClient() error {
+	//NATS client config & startup
+	NATSConnection, err := nats.Connect("nats://csherpa.avero.it:4222")
+	if err != nil {
+		return err
+	}
+	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
+	if err != nil {
+		return err
+	}
+
+	cec = NATSEncodedConnection
+
+	return nil
+}

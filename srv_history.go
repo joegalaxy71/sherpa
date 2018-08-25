@@ -12,6 +12,8 @@ import (
 	"os"
 	"os/user"
 	"strings"
+	"time"
+
 	//"runtime"
 	// "time"
 
@@ -33,36 +35,9 @@ func historyInit() error {
 
 	HISTORY_FILE = homedir + "/.bash_history"
 
-	/*	switch runtime.GOOS {
-		case "darwin":
-			HISTORY_FILE = homedir + "/.bash_history"
-		case "linux":
-			if currUser == "root" {
-				HISTORY_FILE = homedir + "/.bash_history"
-			} else {
-				HISTORY_FILE = homedir + "/.bash_history"
-			}
-		}*/
-
-	go watchHistory()
+	watchHistory()
 
 	return nil
-}
-
-func historyServe(req request) response {
-	log.Warningf("reached historyServer")
-
-	//type assert request/response
-	log.Noticef("Searched: %s", req.Req)
-
-	var res response
-	var entries []HistoryEntry
-
-	db.Limit(30).Where("entry LIKE ?", "%"+req.Req+"%").Find(&entries)
-
-	res.HistoryEntries = entries
-
-	return res
 }
 
 func historyCleanup() error {
@@ -145,19 +120,19 @@ func updateEntriesDB() error {
 
 	//check if size is bigger that the read part or
 	if status.HistFrom == 0 {
-		log.Noticef("history file never read before")
+		log.Debugf("history file never read before")
 		// the chunk we read == file size (real all file)
 		chunk = size
 		readFrom = 0
 	} else if size < status.HistFrom {
 		//if read part = 0 (never read before)
-		log.Noticef("history file size < of part already read, reading whole file")
+		log.Debugf("history file size < of part already read, reading whole file")
 		// the chunk we read == file size (real all file)
 		chunk = size
 		readFrom = 0
 	} else {
 		//calculate chunk to read
-		log.Noticef("history file size > of part already read, reading delta")
+		log.Debugf("history file size > of part already read, reading delta")
 
 		chunk = size - status.HistFrom
 		readFrom = status.HistFrom
@@ -219,19 +194,22 @@ func updateEntriesDB() error {
 
 	for _, entry := range inputStrings {
 		if entry != "" {
-			var temp HistoryEntry
 			//log.Debugf("entry=%s, host=%s", entry, "retina")
-			db.FirstOrCreate(&temp, HistoryEntry{Entry: entry, Host: "retina"})
+
+			var he historyEntry
+			he.Account = 0
+			he.Entry = entry
+			he.UserAtHost = "root@host"
+
+			var res response
+
+			err = cec.Request("history-new", he, &res, 1000*time.Millisecond)
+
 		}
 	}
 
-	//fmt.Printf("%s took %v\n", time.Since(start))
-
 	//TODO: what happens if the history file gets destroyed or modified?
 	// should we treat it as a new file?
-
-	// then we split what we've read into strings
-	// and we insert in the db
 
 	return nil
 }

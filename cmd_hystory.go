@@ -34,7 +34,7 @@ var inputField *tview.InputField
 var entries *tview.Table
 var app *tview.Application
 var focused *tview.Box
-var res response
+var res historyResults
 
 func historyClient(cmd *cobra.Command, args []string) {
 
@@ -55,9 +55,9 @@ func historyClient(cmd *cobra.Command, args []string) {
 	//log.Infof("Parent pid:%v", os.Getppid())
 
 	initNATSClient()
+	initNATSCloudClient()
 
 	terminalHistory()
-
 }
 
 func terminalHistory() {
@@ -93,10 +93,10 @@ func terminalHistory() {
 func updateList(changed string) {
 	// Requests
 	//var res response
-	var req request
-	req.Req = changed
+	var hq historyQuery
+	hq.Query = changed
 
-	err := ec.Request("history", req, &res, 1000*time.Millisecond)
+	err := cec.Request("history-req", hq, &res, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
@@ -109,10 +109,10 @@ func updateList(changed string) {
 		entries.SetCell(0, 2, tview.NewTableCell("[white]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
 
 		for i, entry := range res.HistoryEntries {
-			colorized := colorize(entry.Entry, req.Req)
+			colorized := colorize(entry.Entry, hq.Query)
 			entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
 			entries.SetCell(i+1, 1, tview.NewTableCell("[red]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
-			entries.SetCell(i+1, 2, tview.NewTableCell("[red]"+entry.Host).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
+			entries.SetCell(i+1, 2, tview.NewTableCell("[red]"+entry.UserAtHost).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
 			//log.Debugf("i=%s", i)
 		}
 	}

@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/spf13/cobra"
 )
 
@@ -24,24 +21,4 @@ func promptClient(cmd *cobra.Command, args []string) {
 
 	log.Infof("reached prompt\n")
 
-	err := initNATSClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Noticef("prompt: sending NATS test message")
-
-	// Requests
-	var res response
-	var req request
-	req.Req = "list"
-
-	err = ec.Request("prompt", req, &res, 100*time.Millisecond)
-	if err != nil {
-		fmt.Printf("Request failed: %v\n", err)
-	} else {
-		for _, prompt := range res.Prompts {
-			fmt.Printf("Prompt: Name=%s, Value=%s\n", prompt.Name, prompt.Value)
-		}
-	}
 }

@@ -32,6 +32,8 @@ import (
 
 var inputField *tview.InputField
 var entries *tview.Table
+var modal *tview.Modal
+var flex *tview.Flex
 var app *tview.Application
 var focused *tview.Box
 var res historyResults
@@ -78,8 +80,18 @@ func terminalHistory() {
 	entries.SetCell(0, 0, tview.NewTableCell("start typing to populate list...").SetAlign(tview.AlignLeft))
 	entries.SetInputCapture(interceptTable).SetBorder(true)
 
+	// modal for help
+	modal = tview.NewModal().
+		SetText("Use TAB to switch between the panes, ENTER to paste history command on terminal, ESC to exit").
+		AddButtons([]string{"Ok"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			if buttonLabel == "Ok" {
+				app.SetRoot(flex, true)
+			}
+		})
+
 	// flex
-	flex := tview.NewFlex().SetDirection(tview.FlexRow).
+	flex = tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(help, 1, 1, false).
 		AddItem(inputField, 3, 1, true).
 		AddItem(entries, 0, 6, false)
@@ -145,6 +157,8 @@ func stopAppAndReturnSelected(selected string) {
 func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 	//log.Debug("reached tabToSwitch")
 	switch key.Key() {
+	case tcell.KeyCtrlH:
+		app.SetRoot(modal, false)
 	case tcell.KeyTAB:
 		app.SetFocus(entries)
 	case tcell.KeyBacktab:
@@ -160,6 +174,8 @@ func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 func interceptTable(key *tcell.EventKey) *tcell.EventKey {
 	//log.Debug("reached interceptTable")
 	switch key.Key() {
+	case tcell.KeyCtrlH:
+		app.SetRoot(modal, false)
 	case tcell.KeyTAB:
 		app.SetFocus(inputField)
 	case tcell.KeyBacktab:

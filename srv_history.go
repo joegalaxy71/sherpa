@@ -194,7 +194,7 @@ func updateEntriesDB() error {
 			var he historyNew
 			he.Account = "account"
 			he.Entry = entry
-			he.UserAtHost = "root@host"
+			he.UserAtHost = currentUser.Username + "@" + hostName
 
 			var res response
 

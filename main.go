@@ -28,7 +28,6 @@ var db *gorm.DB
 var status Status
 var hostName string
 var currentUser *user.User
-var userName string
 var DBFILE string
 
 func init() {
@@ -50,8 +49,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	userName = currentUser.Username
 
 	// loggingragazzi,
 	log = logging.MustGetLogger("example")

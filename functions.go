@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	gnatsd "github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/nats"
 )
@@ -21,12 +23,13 @@ func initNATSServer() {
 func initNATSClient() error {
 	//NATS client config & startup
 	NATSConnection, err := nats.Connect(nats.DefaultURL)
-	if err != nil {
-		return err
-	}
+	logAndExit(err, "Unable to establish connection with local server. Is sherpa daemon running?")
+
 	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
-	if err != nil {
-		return err
+	logAndExit(err, "Unable to establish encoded connection with local server")
+
+	if !NATSConnection.IsConnected() {
+		logAndExit(err, "Client non connected.")
 	}
 
 	ec = NATSEncodedConnection
@@ -37,15 +40,23 @@ func initNATSClient() error {
 func initNATSCloudClient() error {
 	//NATS client config & startup
 	NATSConnection, err := nats.Connect("nats://csherpa.avero.it:4222")
-	if err != nil {
-		return err
-	}
+	logAndExit(err, "Unable to establish connection with the cloud server")
+
 	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
-	if err != nil {
-		return err
+	logAndExit(err, "Unable to create and encoded coccection with the cloud server")
+
+	if !NATSConnection.IsConnected() {
+		logAndExit(err, "Client non connected.")
 	}
 
 	cec = NATSEncodedConnection
 
 	return nil
+}
+
+func logAndExit(err error, msg string) {
+	if err != nil {
+		log.Errorf(msg)
+		os.Exit(-1)
+	}
 }

@@ -68,7 +68,7 @@ func terminalHistory() {
 
 	// text (separator)
 	help := tview.NewTextView().SetDynamicColors(true)
-	fmt.Fprintf(help, "[white]sherpa [red]history [gray] <<Search in global history>> ? = help")
+	fmt.Fprintf(help, "[white]sherpa [red]history [gray] <<Search in global history>> ^h = help")
 
 	//inputfield (history incremental partial match prompt)
 	inputField = tview.NewInputField().SetLabel("[white]isearch ").SetChangedFunc(updateList)

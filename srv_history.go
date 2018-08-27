@@ -7,8 +7,6 @@ package main
 // use gorm and gorm defaults, so all records will have automatically "created at"
 
 import (
-	_ "errors"
-	_ "fmt"
 	"os"
 	"os/user"
 	"strings"
@@ -96,6 +94,8 @@ func watchHistory() {
 func updateEntriesDB() error {
 	// read the history file from Histfrom to end of file
 
+	var err error
+
 	// we open the file every time so we don't leave any locks around
 	file, err := os.Open(HISTORY_FILE)
 	if err != nil {
@@ -174,8 +174,6 @@ func updateEntriesDB() error {
 
 	//status.HistFrom = size
 
-	db.Save(&status)
-
 	//log.Noticef("%+v", db)
 
 	//start := time.Now()
@@ -186,6 +184,8 @@ func updateEntriesDB() error {
 
 	// no need to sort (it's a db work) or remove duplicates (they're needed)
 	// write them to the db
+
+	var cloudUpdated = true
 
 	for _, entry := range inputStrings {
 		if entry != "" {
@@ -199,12 +199,15 @@ func updateEntriesDB() error {
 			var res response
 
 			err = cec.Request("history-new", he, &res, 1000*time.Millisecond)
-
+			if err != nil {
+				cloudUpdated = false
+			}
 		}
 	}
 
-	//TODO: what happens if the history file gets destroyed or modified?
-	// should we treat it as a new file?
+	if cloudUpdated == true {
+		db.Save(&status)
+	}
 
 	return nil
 }

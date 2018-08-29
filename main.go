@@ -88,6 +88,8 @@ func init() {
 
 	//DEBUG
 	// go follow()
+
+	log.Noticef("sherpa v 0.33.0 started")
 }
 
 func main() {

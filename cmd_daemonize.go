@@ -44,9 +44,9 @@ func initMicroServer(us microServer) error {
 
 	err := us.init()
 	if err == nil {
-		log.Noticef("%s subserver: init completed\n", us.name)
+		log.Noticef("%s microserver: init completed\n", us.name)
 	} else {
-		log.Errorf("%s subserver: init failed, aborting\n", us.name)
+		log.Errorf("%s microserver: init failed, aborting\n", us.name)
 		os.Exit(-1)
 	}
 

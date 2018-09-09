@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/inconshreveable/go-update"
 	"github.com/spf13/cobra"
+	"net/http"
 	"os"
 )
 
@@ -11,6 +13,9 @@ func daemonize(cmd *cobra.Command, args []string) {
 	initNATSServer()
 	initNATSClient()
 	initNATSCloudClient()
+
+	// nice to have cron jobs inside your executable
+	cronTab.AddFunc("0 30 * * * *", updater)
 
 	// init microServers
 
@@ -51,4 +56,18 @@ func initMicroServer(us microServer) error {
 	}
 
 	return nil
+}
+
+func updater() {
+	log.Noticef("Trying to update..")
+	url := ""
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	err = update.Apply(resp.Body, update.Options{})
+	if err != nil {
+		return
+	}
 }

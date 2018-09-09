@@ -209,5 +209,10 @@ func updateEntriesDB() error {
 		db.Save(&status)
 	}
 
+	test()
+
 	return nil
+}
+
+func test() {
 }

@@ -13,6 +13,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/nats-io/nats"
 	"github.com/op/go-logging"
+	"github.com/robfig/cron"
 	"github.com/spf13/cobra"
 )
 
@@ -31,6 +32,7 @@ var DBFILE string
 var BuildTime string
 var BuildVersion string
 var BuildCommit string
+var cronTab *cron.Cron
 
 func init() {
 	var err error
@@ -81,6 +83,8 @@ func init() {
 	//db.Where("One = ?", "one").First(&status)
 
 	//log.Noticef("DB after init= %+v", db)
+
+	cronTab = cron.New()
 
 	// handle ^c (os.Interrupt)
 	c := make(chan os.Signal, 1)

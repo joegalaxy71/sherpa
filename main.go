@@ -32,6 +32,7 @@ var DBFILE string
 var BuildTime string
 var BuildVersion string
 var BuildCommit string
+var BuildNumber string
 var cronTab *cron.Cron
 
 func init() {
@@ -90,7 +91,7 @@ func init() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
-	go cleanup(c)
+	go handleSignals(c)
 
 	//DEBUG
 	// go follow()
@@ -145,10 +146,24 @@ func main() {
 	rootCmd.Execute()
 }
 
-func cleanup(c chan os.Signal) {
+func handleSignals(c chan os.Signal) {
 	<-c
 	log.Warningf("Got os.Interrupt: cleaning up")
+	shutdown()
+}
 
+func shutdown() {
+	cleanup()
+}
+
+func restart() {
+	cleanup()
+	if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func cleanup() {
 	//TODO: which way to close microservers? a global mode switch (server/client?)
 	// the following block, including the wait time, should be executed (and cleanup message sent) only if server
 

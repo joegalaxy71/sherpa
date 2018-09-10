@@ -15,7 +15,8 @@ func daemonize(cmd *cobra.Command, args []string) {
 	initNATSCloudClient()
 
 	// nice to have cron jobs inside your executable
-	cronTab.AddFunc("0 30 * * * *", updater)
+	cronTab.AddFunc("*/10 * * * * *", updater)
+	cronTab.Start()
 
 	// init microServers
 
@@ -60,14 +61,19 @@ func initMicroServer(us microServer) error {
 
 func updater() {
 	log.Noticef("Trying to update..")
-	url := ""
+	url := "http://sherpa.avero.it/dist/macos/sherpa"
 	resp, err := http.Get(url)
 	if err != nil {
+		log.Errorf("Unable to fetch update url")
 		return
 	}
 	defer resp.Body.Close()
 	err = update.Apply(resp.Body, update.Options{})
 	if err != nil {
+		log.Errorf("Unable to update")
+		println(err)
 		return
 	}
+	log.Infof("Update sucessfully, shutting down")
+	shutdown()
 }

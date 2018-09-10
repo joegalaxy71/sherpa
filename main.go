@@ -154,6 +154,7 @@ func handleSignals(c chan os.Signal) {
 
 func shutdown() {
 	cleanup()
+	os.Exit(1)
 }
 
 func restart() {
@@ -161,6 +162,7 @@ func restart() {
 	if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
 		log.Fatal(err)
 	}
+	os.Exit(1)
 }
 
 func cleanup() {
@@ -180,9 +182,6 @@ func cleanup() {
 	log.Noticef("Cleanup: waiting 1 sec for subservers cleanup")
 	// give everyone globally 10 second to clean up everything
 	time.Sleep(1000000000)
-
-	// exiting gracefully
-	os.Exit(1)
 }
 
 func follow() {

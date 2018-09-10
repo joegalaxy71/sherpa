@@ -75,5 +75,5 @@ func updater() {
 		return
 	}
 	log.Infof("Update sucessfully, shutting down")
-	shutdown()
+	restart()
 }

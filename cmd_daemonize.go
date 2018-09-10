@@ -15,7 +15,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 	initNATSCloudClient()
 
 	// nice to have cron jobs inside your executable
-	cronTab.AddFunc("*/10 * * * * *", updater)
+	cronTab.AddFunc("*/30 * * * * *", updater)
 	cronTab.Start()
 
 	// init microServers

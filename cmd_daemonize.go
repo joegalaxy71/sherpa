@@ -15,7 +15,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 	initNATSCloudClient()
 
 	// nice to have cron jobs inside your executable
-	cronTab.AddFunc("*/30 * * * * *", updater)
+	cronTab.AddFunc("*/60 * * * * *", updater)
 	cronTab.Start()
 
 	// init microServers
@@ -60,6 +60,13 @@ func initMicroServer(us microServer) error {
 }
 
 func updater() {
+	//TODO must check a version file containing the build number before downloading and applying the update
+
+	// we check a secondary file containing the build number
+	// we fetch app own build number
+	// if cloud build number > build number
+	//	proceed with the update
+
 	log.Noticef("Trying to update..")
 	url := "http://sherpa.avero.it/dist/macos/sherpa"
 	resp, err := http.Get(url)

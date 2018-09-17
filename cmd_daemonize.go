@@ -36,7 +36,8 @@ func daemonize(cmd *cobra.Command, args []string) {
 		wg.Add(1)*/
 
 	// init complete
-	log.Noticef("daemonize init complete")
+	log.Noticef("Sherpa daemon initi complete")
+	log.Infof("Build # %s started", BuildNumber)
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)

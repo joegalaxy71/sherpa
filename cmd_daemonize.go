@@ -70,7 +70,7 @@ func updater() {
 	// we check a secondary file containing the build number
 
 	// we fetch app own build number
-	url := "http://sherpa.avero.it/dist/macos/sherpa"
+	url := "http://sherpa.avero.it/dist/macos/sherpa.yaml"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Errorf("Unable to fetch version file url")

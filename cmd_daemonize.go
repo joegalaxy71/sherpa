@@ -112,5 +112,7 @@ func updater() {
 		}
 		log.Infof("Update sucessfully, shutting down")
 		restart()
+	} else {
+		log.Noticef("No need to update, checking agains as specified by internal cron sys")
 	}
 }

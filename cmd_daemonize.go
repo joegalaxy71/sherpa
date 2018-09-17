@@ -3,8 +3,11 @@ package main
 import (
 	"github.com/inconshreveable/go-update"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func daemonize(cmd *cobra.Command, args []string) {
@@ -63,25 +66,51 @@ func initMicroServer(us microServer) error {
 func updater() {
 	//TODO must check a version file containing the build number before downloading and applying the update
 
-	// we check a secondary file containing the build number
-	// we fetch app own build number
-	// if cloud build number > build number
-	//	proceed with the update
-
 	log.Noticef("Trying to update..")
+	// we check a secondary file containing the build number
+
+	// we fetch app own build number
 	url := "http://sherpa.avero.it/dist/macos/sherpa"
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Errorf("Unable to fetch update url")
+		log.Errorf("Unable to fetch version file url")
 		return
 	}
-	defer resp.Body.Close()
-	err = update.Apply(resp.Body, update.Options{})
+
+	// create a pointer to an empty UpdateInfo
+	updateInfo := &UpdateInfo{}
+
+	// and pass is to a the YAML unmarshaler
+	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Errorf("Unable to update")
-		println(err)
-		return
+		log.Fatalf("error: %v", err)
 	}
-	log.Infof("Update sucessfully, shutting down")
-	restart()
+
+	err = yaml.Unmarshal(bytes, updateInfo)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	currentBuildNumber, err := strconv.Atoi(BuildNumber)
+
+	if updateInfo.BuildNumber > currentBuildNumber {
+		// if cloud build number > build number
+		//	proceed with the update
+
+		url := "http://sherpa.avero.it/dist/macos/sherpa"
+		resp, err := http.Get(url)
+		if err != nil {
+			log.Errorf("Unable to fetch update url")
+			return
+		}
+		defer resp.Body.Close()
+		err = update.Apply(resp.Body, update.Options{})
+		if err != nil {
+			log.Errorf("Unable to update")
+			println(err)
+			return
+		}
+		log.Infof("Update sucessfully, shutting down")
+		restart()
+	}
 }

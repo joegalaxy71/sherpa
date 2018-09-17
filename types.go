@@ -7,3 +7,6 @@ type microServer struct {
 	init    func() error
 	cleanup func() error
 }
+type UpdateInfo struct {
+	BuildNumber int
+}

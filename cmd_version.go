@@ -16,4 +16,7 @@ func cmdVersion(cmd *cobra.Command, args []string) {
 	log.Noticef("Build date: %s", BuildTime)
 	log.Noticef("Build version: %s", BuildVersion)
 	log.Noticef("Build git commit hash: %s", BuildCommit)
+	log.Noticef("Target OS : %s", BuildOS)
+	log.Noticef("Target Architecture: %s", BuildArch)
+
 }

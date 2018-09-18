@@ -66,7 +66,7 @@ func initMicroServer(us microServer) error {
 func updater() {
 	//TODO must check a version file containing the build number before downloading and applying the update
 
-	log.Noticef("Trying to update..")
+	log.Noticef("Trying to update from build# %s", BuildNumber)
 	// we check a secondary file containing the build number
 
 	// we fetch app own build number
@@ -94,8 +94,11 @@ func updater() {
 	currentBuildNumber, err := strconv.Atoi(BuildNumber)
 
 	if updateInfo.BuildNumber > currentBuildNumber {
+
 		// if cloud build number > build number
 		//	proceed with the update
+
+		log.Noticef("Updating to build# %s", updateInfo.BuildNumber)
 
 		url := "http://sherpa.avero.it/dist/macos/sherpa"
 		resp, err := http.Get(url)
@@ -113,6 +116,6 @@ func updater() {
 		log.Infof("Update sucessfully, shutting down")
 		restart()
 	} else {
-		log.Noticef("No need to update, checking agains as specified by internal cron sys")
+		log.Noticef("No need to update")
 	}
 }

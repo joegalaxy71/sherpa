@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func debugClient(cmd *cobra.Command, args []string) {
+func cmdDebug(cmd *cobra.Command, args []string) {
 
 	log.Infof("reached test\n")
 

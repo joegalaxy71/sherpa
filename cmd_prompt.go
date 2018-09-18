@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func promptClient(cmd *cobra.Command, args []string) {
+func cmdPrompt(cmd *cobra.Command, args []string) {
 
 	//TODO: implement everything
 

@@ -6,6 +6,8 @@ import (
 
 func cmdVersion(cmd *cobra.Command, args []string) {
 
+	command = "version"
+
 	//log.Infof("reached version\n")
 
 	/*	var entry HistoryEntry

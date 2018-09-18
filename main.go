@@ -34,6 +34,7 @@ var BuildVersion string
 var BuildCommit string
 var BuildNumber string
 var cronTab *cron.Cron
+var command string
 
 func init() {
 	var err error
@@ -96,7 +97,7 @@ func init() {
 	//DEBUG
 	// go follow()
 
-	BuildVersion = "0.33.0"
+	BuildVersion = "0.33.1"
 }
 
 func main() {
@@ -114,7 +115,7 @@ func main() {
 		Short: "Get the sherpa collected history",
 		Long:  "Sherpa gets history from all the sources available. This commands let you walk in the history.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   historyClient,
+		Run:   cmdHistory,
 	}
 
 	var cmdPrompt = &cobra.Command{
@@ -122,7 +123,7 @@ func main() {
 		Short: "Allows to inspect prompts and/or change the current prompt",
 		Long:  "Sherpa mantains an updated list of prompts. This commands let you see the list and change your prompt.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   promptClient,
+		Run:   cmdPrompt,
 	}
 
 	var cmdTest = &cobra.Command{
@@ -130,7 +131,7 @@ func main() {
 		Short: "This is here only for debug purposes",
 		Long:  "Sherpa debug is used to test experimental functions and facilities, do not invoke, should be disabled.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   debugClient,
+		Run:   cmdDebug,
 	}
 
 	var cmdVersion = &cobra.Command{

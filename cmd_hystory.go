@@ -38,7 +38,9 @@ var app *tview.Application
 var focused *tview.Box
 var res historyResults
 
-func historyClient(cmd *cobra.Command, args []string) {
+func cmdHistory(cmd *cobra.Command, args []string) {
+
+	command = "history"
 
 	//TODO: implement everything
 

@@ -23,13 +23,13 @@ func initNATSServer() {
 func initNATSClient() error {
 	//NATS client config & startup
 	NATSConnection, err := nats.Connect(nats.DefaultURL)
-	logAndExit(err, "Unable to establish connection with local server. Is sherpa daemon running?")
+	handleErr(err, "Unable to establish connection with local server. Is sherpa daemon running?")
 
 	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
-	logAndExit(err, "Unable to establish encoded connection with local server")
+	handleErr(err, "Unable to establish encoded connection with local server")
 
 	if !NATSConnection.IsConnected() {
-		logAndExit(err, "Client non connected.")
+		handleErr(err, "Client non connected.")
 	}
 
 	ec = NATSEncodedConnection
@@ -40,13 +40,13 @@ func initNATSClient() error {
 func initNATSCloudClient() error {
 	//NATS client config & startup
 	NATSConnection, err := nats.Connect("nats://csherpa.avero.it:4222")
-	logAndExit(err, "Unable to establish connection with the cloud server")
+	handleErr(err, "Unable to establish connection with the cloud server")
 
 	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
-	logAndExit(err, "Unable to create and encoded coccection with the cloud server")
+	handleErr(err, "Unable to create and encoded coccection with the cloud server")
 
 	if !NATSConnection.IsConnected() {
-		logAndExit(err, "Client non connected.")
+		handleErr(err, "Client non connected.")
 	}
 
 	cec = NATSEncodedConnection
@@ -54,7 +54,7 @@ func initNATSCloudClient() error {
 	return nil
 }
 
-func logAndExit(err error, msg string) {
+func handleErr(err error, msg string) {
 	if err != nil {
 		log.Errorf(msg)
 		os.Exit(-1)

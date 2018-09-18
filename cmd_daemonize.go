@@ -40,7 +40,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 
 	// init complete
 	log.Noticef("Sherpa daemon initi complete")
-	log.Infof("Build # %s started", BuildNumber)
+	log.Infof("Build #%s started", BuildNumber)
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)
@@ -98,7 +98,7 @@ func updater() {
 		// if cloud build number > build number
 		//	proceed with the update
 
-		log.Noticef("Updating to build# %s", updateInfo.BuildNumber)
+		log.Noticef("Updating to build#%s", updateInfo.BuildNumber)
 
 		url := "http://sherpa.avero.it/dist/macos/sherpa"
 		resp, err := http.Get(url)

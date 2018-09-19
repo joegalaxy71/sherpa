@@ -18,7 +18,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 	initNATSCloudClient()
 
 	// nice to have cron jobs inside your executable
-	cronTab.AddFunc("*/60 * * * * *", updater)
+	cronTab.AddFunc("*/10 * * * * *", updater)
 	cronTab.Start()
 
 	// init microServers
@@ -78,7 +78,7 @@ func updater() {
 	}
 
 	// create a pointer to an empty UpdateInfo
-	updateInfo := &UpdateInfo{}
+	updateInfo := UpdateInfo{}
 
 	// and pass is to a the YAML unmarshaler
 	bytes, err := ioutil.ReadAll(resp.Body)
@@ -86,14 +86,18 @@ func updater() {
 		log.Fatalf("error: %v", err)
 	}
 
-	err = yaml.Unmarshal(bytes, updateInfo)
+	err = yaml.Unmarshal(bytes, &updateInfo)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
+	log.Noticef("fetched build #%v", updateInfo.BuildNumber)
+
 	currentBuildNumber, err := strconv.Atoi(BuildNumber)
 
-	if updateInfo.BuildNumber > currentBuildNumber {
+	updateBuildNumber, err := strconv.Atoi(updateInfo.BuildNumber)
+
+	if updateBuildNumber > currentBuildNumber {
 
 		// if cloud build number > build number
 		//	proceed with the update

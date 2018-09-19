@@ -8,5 +8,5 @@ type microServer struct {
 	cleanup func() error
 }
 type UpdateInfo struct {
-	BuildNumber int
+	BuildNumber string
 }

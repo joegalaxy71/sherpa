@@ -18,7 +18,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 	initNATSCloudClient()
 
 	// nice to have cron jobs inside your executable
-	cronTab.AddFunc("*/10 * * * * *", updater)
+	cronTab.AddFunc("*/60 * * * * *", updater)
 	cronTab.Start()
 
 	// init microServers
@@ -39,7 +39,7 @@ func daemonize(cmd *cobra.Command, args []string) {
 		wg.Add(1)*/
 
 	// init complete
-	log.Noticef("Sherpa daemon initi complete")
+	log.Noticef("Sherpa daemon init complete")
 	log.Infof("Build #%s started", BuildNumber)
 
 	// wait for all the goroutines to end before exiting
@@ -90,6 +90,8 @@ func updater() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
+
+	//log.Noticef("parsed:%#v", updateInfo)
 
 	log.Noticef("fetched build #%v", updateInfo.BuildNumber)
 

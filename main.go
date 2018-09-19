@@ -59,7 +59,7 @@ func init() {
 		panic(err)
 	}
 
-	// loggingragazzi,
+	// logging
 	log = logging.MustGetLogger("example")
 	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
 	backend2 := logging.NewLogBackend(os.Stderr, "", 0)

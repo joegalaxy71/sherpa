@@ -19,6 +19,6 @@ func cmdPrompt(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	log.Infof("reached prompt\n")
+	log.Debugf("reached prompt\n")
 
 }

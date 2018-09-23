@@ -39,8 +39,8 @@ func daemonize(cmd *cobra.Command, args []string) {
 		wg.Add(1)*/
 
 	// init complete
-	log.Noticef("Sherpa daemon init complete")
-	log.Infof("Build #%s started", BuildNumber)
+	log.Debugf("Sherpa daemon init complete")
+	log.Debugf("Build #%s started", BuildNumber)
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)
@@ -54,7 +54,7 @@ func initMicroServer(us microServer) error {
 
 	err := us.init()
 	if err == nil {
-		log.Noticef("%s microserver: init completed\n", us.name)
+		log.Debugf("%s microserver: init completed\n", us.name)
 	} else {
 		log.Errorf("%s microserver: init failed, aborting\n", us.name)
 		os.Exit(-1)
@@ -66,7 +66,7 @@ func initMicroServer(us microServer) error {
 func updater() {
 	//TODO must check a version file containing the build number before downloading and applying the update
 
-	log.Noticef("Trying to update from build# %s", BuildNumber)
+	log.Debugf("Trying to update from build# %s", BuildNumber)
 	// we check a secondary file containing the build number
 
 	// we fetch app own build number
@@ -91,9 +91,9 @@ func updater() {
 		log.Fatalf("error: %v", err)
 	}
 
-	//log.Noticef("parsed:%#v", updateInfo)
+	//log.Debugf("parsed:%#v", updateInfo)
 
-	log.Noticef("fetched build #%v", updateInfo.BuildNumber)
+	log.Debugf("fetched build #%v", updateInfo.BuildNumber)
 
 	currentBuildNumber, err := strconv.Atoi(BuildNumber)
 
@@ -104,7 +104,7 @@ func updater() {
 		// if cloud build number > build number
 		//	proceed with the update
 
-		log.Noticef("Updating to build#%s", updateInfo.BuildNumber)
+		log.Debugf("Updating to build#%s", updateInfo.BuildNumber)
 
 		url := "http://sherpa.avero.it/dist/macos/sherpa"
 		resp, err := http.Get(url)
@@ -119,9 +119,9 @@ func updater() {
 			println(err)
 			return
 		}
-		log.Infof("Update sucessfully, shutting down")
+		log.Infof("Sherpa has been updated. Restarting...")
 		restart()
 	} else {
-		log.Noticef("No need to update")
+		log.Debugf("No need to update")
 	}
 }

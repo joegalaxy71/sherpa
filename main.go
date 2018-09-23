@@ -152,7 +152,7 @@ func main() {
 
 func handleSignals(c chan os.Signal) {
 	<-c
-	log.Warningf("Got os.Interrupt: cleaning up")
+	log.Noticef("Got os.Interrupt: cleaning up")
 	shutdown()
 }
 
@@ -164,7 +164,7 @@ func shutdown() {
 func restart() {
 	cleanup()
 	if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	os.Exit(1)
 }

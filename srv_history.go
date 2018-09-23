@@ -174,7 +174,7 @@ func updateEntriesDB() error {
 
 	//status.HistFrom = size
 
-	//log.Noticef("%+v", db)
+	//log.Debugf("%+v", db)
 
 	//start := time.Now()
 

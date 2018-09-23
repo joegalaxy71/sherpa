@@ -19,7 +19,7 @@ func initLogs(verbose bool) {
 	backend1Leveled := logging.AddModuleLevel(backend1)
 	backend1Leveled.SetLevel(logging.INFO, "")
 	if verbose == true {
-		logging.SetBackend(backend1Leveled, backend2Formatter)
+		logging.SetBackend(backend2Formatter)
 	} else {
 		logging.SetBackend(backend1Leveled)
 	}

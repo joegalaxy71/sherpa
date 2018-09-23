@@ -94,7 +94,7 @@ func updater() {
 
 	//log.Debugf("parsed:%#v", updateInfo)
 
-	log.Debugf("fetched build #%v", updateInfo.BuildNumber)
+	log.Debugf("Fileserver build #%s", updateInfo.BuildNumber)
 
 	currentBuildNumber, err := strconv.Atoi(BuildNumber)
 

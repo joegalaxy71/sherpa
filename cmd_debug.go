@@ -6,6 +6,8 @@ import (
 
 func cmdDebug(cmd *cobra.Command, args []string) {
 
+	initLogs(true)
+
 	log.Debugf("debug")
 	log.Infof("info")
 	log.Noticef("notice")

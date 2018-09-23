@@ -58,6 +58,8 @@ func cmdHistory(cmd *cobra.Command, args []string) {
 	//log.Infof("reached historyClient")
 	//log.Infof("Parent pid:%v", os.Getppid())
 
+	initLogs(false)
+
 	initNATSClient()
 	initNATSCloudClient()
 

@@ -39,6 +39,8 @@ var BuildArch string
 var cronTab *cron.Cron
 var command string
 
+var verbose bool
+
 func init() {
 	var err error
 
@@ -58,17 +60,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	// logging
-	log = logging.MustGetLogger("example")
-	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
-	format := logging.MustStringFormatter(
-		"%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}")
-	backend2Formatter := logging.NewBackendFormatter(backend2, format)
-	backend1Leveled := logging.AddModuleLevel(backend1)
-	backend1Leveled.SetLevel(logging.ERROR, "")
-	logging.SetBackend(backend1Leveled, backend2Formatter)
 
 	// SQLite DB via Gorm
 	dbconn, err := gorm.Open("sqlite3", DBFILE)
@@ -113,6 +104,8 @@ func main() {
 		Run:   daemonize,
 	}
 
+	cmdDaemonize.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode, expect a lot of chat")
+
 	var cmdHistory = &cobra.Command{
 		Use:   "history",
 		Short: "Get the sherpa collected history",
@@ -152,7 +145,7 @@ func main() {
 
 func handleSignals(c chan os.Signal) {
 	<-c
-	log.Noticef("Got os.Interrupt: cleaning up")
+	log.Noticef("Got os.Interrupt: cleaning up and exiting")
 	shutdown()
 }
 
@@ -183,7 +176,7 @@ func cleanup() {
 			fmt.Printf("Request failed: %v\n", err)
 		}*/
 
-	log.Noticef("Cleanup: waiting 1 sec for subservers cleanup")
+	log.Debugf("Cleanup: waiting 1 sec for subservers cleanup")
 	// give everyone globally 10 second to clean up everything
 	time.Sleep(1000000000)
 }

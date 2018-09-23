@@ -7,6 +7,7 @@ import (
 func cmdVersion(cmd *cobra.Command, args []string) {
 
 	command = "version"
+	initLogs(false)
 
 	//log.Infof("reached version\n")
 

@@ -5,7 +5,25 @@ import (
 
 	gnatsd "github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/nats"
+	"github.com/op/go-logging"
 )
+
+func initLogs(verbose bool) {
+	// logging
+	log = logging.MustGetLogger("example")
+	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
+	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
+	format := logging.MustStringFormatter(
+		"%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}")
+	backend2Formatter := logging.NewBackendFormatter(backend2, format)
+	backend1Leveled := logging.AddModuleLevel(backend1)
+	backend1Leveled.SetLevel(logging.INFO, "")
+	if verbose == true {
+		logging.SetBackend(backend1Leveled, backend2Formatter)
+	} else {
+		logging.SetBackend(backend1Leveled)
+	}
+}
 
 func initNATSServer() {
 	// embedded NATS server config & startup

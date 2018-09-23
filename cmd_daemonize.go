@@ -13,6 +13,7 @@ import (
 func daemonize(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
 
+	initLogs(verbose)
 	initNATSServer()
 	initNATSClient()
 	initNATSCloudClient()

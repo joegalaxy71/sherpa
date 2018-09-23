@@ -8,6 +8,8 @@ func cmdPrompt(cmd *cobra.Command, args []string) {
 
 	//TODO: implement everything
 
+	initLogs(false)
+
 	// SERVER PART
 	// * open the history files and read the file into a []string
 	// * subscribe to a specific history channel and listen

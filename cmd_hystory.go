@@ -165,6 +165,8 @@ func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 		app.SetRoot(modal, false)
 	case tcell.KeyTAB:
 		app.SetFocus(entries)
+	case tcell.KeyDown:
+		app.SetFocus(entries)
 	case tcell.KeyBacktab:
 		app.SetFocus(entries)
 	case tcell.KeyEnter:

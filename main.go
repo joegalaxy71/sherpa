@@ -33,8 +33,6 @@ var BuildTime string
 var BuildVersion string
 var BuildCommit string
 var BuildNumber string
-var BuildOS string
-var BuildArch string
 
 var cronTab *cron.Cron
 var command string

@@ -1,8 +1,8 @@
-// +build windows
+// +build linux
 
 package main
 
-const PATH_SEPARATOR = '\\'
+const PATH_SEPARATOR = '/'
 
-const BUILDOS = "windows"
+const BUILDOS = "linux"
 const BUILDARCH = "amd64"

@@ -70,8 +70,10 @@ func updater() {
 	log.Debugf("Trying to update from build# %s", BuildNumber)
 	// we check a secondary file containing the build number
 
+	baseUrl := "http://sherpa.avero.it/dist/" + BUILDOS + "_" + BUILDARCH + "/"
+
 	// we fetch app own build number
-	url := "http://sherpa.avero.it/dist/macos/sherpa.yaml"
+	url := baseUrl + "sherpa.yaml"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Errorf("Unable to fetch version file url")
@@ -107,7 +109,7 @@ func updater() {
 
 		log.Debugf("Updating to build#%s", updateInfo.BuildNumber)
 
-		url := "http://sherpa.avero.it/dist/macos/sherpa"
+		url := baseUrl + "sherpa"
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Errorf("Unable to fetch update url")

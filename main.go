@@ -97,18 +97,68 @@ func main() {
 	var cmdAccount = &cobra.Command{
 		Use:   "account",
 		Short: "Manage account on sherpa cloud",
-		Long:  "Account is a master command used to signup, signin, change or recover passoword and add ore remove machines.",
+		Long:  "Account is a master command used to signup, signin, change or recover password and add or remove machines.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   cmdAccount,
+		Run:   account,
 	}
 
-	var cmdLogin = &cobra.Command{
+	var cmdAccountInfo = &cobra.Command{
+		Use:   "info",
+		Short: "Gives back summarized account info",
+		Long:  "Account info reports the number of connected machines, with summarized details about the sherpa daemons running on them.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   accountInfo,
+	}
+
+	var cmdAccountLogin = &cobra.Command{
 		Use:   "login",
+		Short: "Logs in into sherpa cloud",
+		Long:  "Account login asks for email and password and then allows the sherpa daemon to login to the sherpa cloud",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   accountLogin,
+	}
+
+	var cmdAccountCreate = &cobra.Command{
+		Use:   "create",
+		Short: "Create account on sherpa cloud",
+		Long:  "Account create allows you to create an account on sherpa cloud.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   accountCreate,
+	}
+
+	var cmdAccountPassword = &cobra.Command{
+		Use:   "password",
+		Short: "Password subcommand for password management.",
+		Long:  "This is a subcommand that allows you to change or reset your password.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   accountPassword,
+	}
+
+	var cmdAccountPasswordChange = &cobra.Command{
+		Use:   "change",
 		Short: "Login to an account on sherpa cloud",
 		Long:  "Allows you to specify email and password and thus login to the sherpa cloud.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   cmdLogin,
+		Run:   accountPasswordChange,
 	}
+
+	var cmdAccountPasswordRecover = &cobra.Command{
+		Use:   "recover",
+		Short: "Login to an account on sherpa cloud",
+		Long:  "Allows you to specify email and password and thus login to the sherpa cloud.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   accountPasswordRecover,
+	}
+
+	var cmdAccountPasswordReset = &cobra.Command{
+		Use:   "reset",
+		Short: "Reset the password of an account on sherpa cloud",
+		Long:  "Allows you to Reset the password of an account on sherpa cloud. Requires the reset code.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   accountPasswordReset,
+	}
+
+	//////////////////////////
 
 	var cmdDaemonize = &cobra.Command{
 		Use:   "daemonize",
@@ -154,7 +204,9 @@ func main() {
 
 	var rootCmd = &cobra.Command{Use: "sherpa"}
 	rootCmd.AddCommand(cmdAccount, cmdHistory, cmdPrompt, cmdTest, cmdDaemonize, cmdVersion)
-	cmdAccount.AddCommand(cmdLogin)
+	cmdAccount.AddCommand(cmdAccountInfo, cmdAccountCreate, cmdAccountLogin)
+	cmdAccount.AddCommand(cmdAccountPassword)
+	cmdAccountPassword.AddCommand(cmdAccountPasswordChange, cmdAccountPasswordRecover, cmdAccountPasswordReset)
 	rootCmd.Execute()
 }
 

@@ -94,12 +94,28 @@ func init() {
 
 func main() {
 
+	var cmdAccount = &cobra.Command{
+		Use:   "account",
+		Short: "Manage account on sherpa cloud",
+		Long:  "Account is a master command used to signup, signin, change or recover passoword and add ore remove machines.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   cmdAccount,
+	}
+
+	var cmdLogin = &cobra.Command{
+		Use:   "login",
+		Short: "Login to an account on sherpa cloud",
+		Long:  "Allows you to specify email and password and thus login to the sherpa cloud.",
+		Args:  cobra.MinimumNArgs(0),
+		Run:   cmdLogin,
+	}
+
 	var cmdDaemonize = &cobra.Command{
 		Use:   "daemonize",
 		Short: "Execute Sherpa server",
-		Long:  "daemonize runs the server component of sherpa, staying in the forefront, if you need it to detach to background, use -b.",
+		Long:  "Daemonize runs the server component of sherpa, staying in the forefront, if you need it to detach to background, use -b.",
 		Args:  cobra.MinimumNArgs(0),
-		Run:   daemonize,
+		Run:   cmdDaemonize,
 	}
 
 	cmdDaemonize.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode, expect a lot of chat")
@@ -137,7 +153,8 @@ func main() {
 	}
 
 	var rootCmd = &cobra.Command{Use: "sherpa"}
-	rootCmd.AddCommand(cmdHistory, cmdPrompt, cmdTest, cmdDaemonize, cmdVersion)
+	rootCmd.AddCommand(cmdAccount, cmdHistory, cmdPrompt, cmdTest, cmdDaemonize, cmdVersion)
+	cmdAccount.AddCommand(cmdLogin)
 	rootCmd.Execute()
 }
 

@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func daemonize(cmd *cobra.Command, args []string) {
+func cmdDaemonize(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
 
 	initLogs(verbose)

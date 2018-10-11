@@ -30,3 +30,11 @@ type historyNew struct {
 type historyNewResp struct {
 	Error error
 }
+
+// ACCOUNT
+// create
+
+type accountCreateReq struct {
+	Email    string
+	Password string
+}

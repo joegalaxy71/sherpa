@@ -8,7 +8,6 @@ package main
 
 import (
 	"os"
-	"os/user"
 	"strings"
 	"time"
 
@@ -18,20 +17,13 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-//const HISTORY_FILE = "/root/.bash_history"
-var HISTORY_FILE string
+//const historyFile = "/root/.bash_history"
+var historyFile string
 var watcher *fsnotify.Watcher
 
 func historyInit() error {
 
-	currUser, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	homedir := currUser.HomeDir
-
-	HISTORY_FILE = homedir + "/.bash_history"
+	historyFile = homedir + "/.bash_history"
 
 	watchHistory()
 
@@ -85,7 +77,7 @@ func watchHistory() {
 	//we launch manually the first db update
 	updateEntriesDB()
 
-	err = watcher.Add(HISTORY_FILE)
+	err = watcher.Add(historyFile)
 	if err != nil {
 		log.Error(err)
 	}
@@ -97,7 +89,7 @@ func updateEntriesDB() error {
 	var err error
 
 	// we open the file every time so we don't leave any locks around
-	file, err := os.Open(HISTORY_FILE)
+	file, err := os.Open(historyFile)
 	if err != nil {
 		return err
 	}

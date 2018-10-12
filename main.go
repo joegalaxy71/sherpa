@@ -37,6 +37,8 @@ var BuildNumber string
 var cronTab *cron.Cron
 var command string
 
+var homedir string
+
 var verbose bool
 
 func init() {
@@ -58,6 +60,13 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	currUser, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	homedir = currUser.HomeDir
 
 	// SQLite DB via Gorm
 	dbconn, err := gorm.Open("sqlite3", DBFILE)

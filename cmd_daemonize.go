@@ -10,12 +10,20 @@ import (
 	"strconv"
 )
 
+var configFile string
+
 func cmdDaemonize(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
 
 	var err error
 
 	initLogs(verbose)
+
+	err = createConfigIfMissing()
+	if err != nil {
+		log.Infof("Unable to create dafault config file.")
+		os.Exit(-1)
+	}
 
 	err = readConfig()
 	if err != nil {
@@ -87,18 +95,65 @@ func initMicroServer(us microServer) error {
 	}
 }
 
+func createConfigIfMissing() error {
+	log.Debugf("Checking existance of a valid config file")
+	var err error
+
+	configFile = homedir + "/.sherpa"
+
+	_, err = os.Open(configFile)
+	if err != nil {
+		// no file present, creating one
+		file, err := os.Create(configFile)
+		if err != nil {
+			log.Debugf("unable to create config file")
+			return err
+		}
+		defer file.Close()
+		// create an empty Config type
+		config := Config{}
+		data, err := yaml.Marshal(&config)
+		if err != nil {
+			log.Fatalf("error: %v", err)
+		}
+		written, err := file.Write(data)
+		if err != nil {
+			log.Fatalf("error: %v", err)
+		}
+		log.Debugf("Created new YAML config file: %v bytes written", written)
+	}
+
+	return nil
+}
+
 func readConfig() error {
 	log.Debugf("Reading config file")
 	var err error
 
-	// we open the file every time so we don't leave any locks around
-	file, err := os.Open(HISTORY_FILE)
+	configFile = homedir + "/.sherpa"
+
+	file, err := os.Open(configFile)
 	if err != nil {
 		return err
 	}
 
-	defer file.Close()
+	// create a pointer to an empty UpdateInfo
+	config := Config{}
 
+	// and pass is to a the YAML unmarshaler
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	err = yaml.Unmarshal(bytes, &config)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	log.Debugf("Unmarshaled config=%+v", config)
+
+	defer file.Close()
 	return nil
 }
 

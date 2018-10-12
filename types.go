@@ -10,3 +10,7 @@ type microServer struct {
 type UpdateInfo struct {
 	BuildNumber string
 }
+
+type Config struct {
+	APIKey string
+}

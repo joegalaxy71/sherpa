@@ -13,13 +13,37 @@ import (
 func cmdDaemonize(cmd *cobra.Command, args []string) {
 	//var args_empty = []string{""}
 
+	var err error
+
 	initLogs(verbose)
+
+	err = readConfig()
+	if err != nil {
+		log.Infof("Unable to read from config file.")
+		os.Exit(-1)
+	}
+
 	initNATSServer()
-	initNATSClient()
-	initNATSCloudClient()
+
+	err = initNATSClient()
+	if err != nil {
+		log.Infof("Unable to initialize NATS client.")
+		os.Exit(-1)
+	}
+
+	err = initNATSCloudClient()
+	if err != nil {
+		log.Infof("Unable to initialize NATS cloud client.")
+		os.Exit(-1)
+	}
 
 	// nice to have cron jobs inside your executable
-	cronTab.AddFunc("*/60 * * * * *", updater)
+	err = cronTab.AddFunc("*/60 * * * * *", updater)
+	if err != nil {
+		log.Infof("Unable to initialize CRON subsystemt.")
+		os.Exit(-1)
+	}
+
 	cronTab.Start()
 
 	// init microServers
@@ -56,10 +80,24 @@ func initMicroServer(us microServer) error {
 	err := us.init()
 	if err == nil {
 		log.Debugf("%s microserver: init completed\n", us.name)
+		return nil
 	} else {
 		log.Errorf("%s microserver: init failed, aborting\n", us.name)
-		os.Exit(-1)
+		return err
 	}
+}
+
+func readConfig() error {
+	log.Debugf("Reading config file")
+	var err error
+
+	// we open the file every time so we don't leave any locks around
+	file, err := os.Open(HISTORY_FILE)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
 
 	return nil
 }

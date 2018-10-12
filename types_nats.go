@@ -38,3 +38,8 @@ type accountCreateReq struct {
 	Email    string
 	Password string
 }
+
+type accountCreateRes struct {
+	Status  bool
+	Message string
+}

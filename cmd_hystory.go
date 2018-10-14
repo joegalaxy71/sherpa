@@ -40,14 +40,14 @@ var res historyResults
 
 func cmdHistory(cmd *cobra.Command, args []string) {
 
-	command = "history"
+	_command = "history"
 
 	//TODO: implement everything
 
 	// SERVER PART
 	// * open the history files and read the file into a []string
 	// * subscribe to a specific history channel and listen
-	// * receive partial command string and send back a []string with matching strings
+	// * receive partial _command string and send back a []string with matching strings
 
 	// CLIENT PART
 	// * enter termbox mode
@@ -55,8 +55,8 @@ func cmdHistory(cmd *cobra.Command, args []string) {
 	// * display a browseable List of partially matching commands
 	// * allow the user to select one and paste it to the shell prompt
 
-	//log.Infof("reached historyClient")
-	//log.Infof("Parent pid:%v", os.Getppid())
+	//_log.Infof("reached historyClient")
+	//_log.Infof("Parent pid:%v", os.Getppid())
 
 	initLogs(false)
 
@@ -86,7 +86,7 @@ func terminalHistory() {
 
 	// modal for help
 	modal = tview.NewModal().
-		SetText("Use TAB to switch between the panes, ENTER to paste history command on terminal, ESC to exit").
+		SetText("Use TAB to switch between the panes, ENTER to paste history _command on terminal, ESC to exit").
 		AddButtons([]string{"Ok"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			if buttonLabel == "Ok" {
@@ -112,7 +112,7 @@ func updateList(changed string) {
 	var hq historyQuery
 	hq.Query = changed
 
-	err := cec.Request("history-req", hq, &res, 1000*time.Millisecond)
+	err := _cec.Request("history-req", hq, &res, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
@@ -129,7 +129,7 @@ func updateList(changed string) {
 			entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
 			entries.SetCell(i+1, 1, tview.NewTableCell("[red]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
 			entries.SetCell(i+1, 2, tview.NewTableCell("[red]"+entry.UserAtHost).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
-			//log.Debugf("i=%s", i)
+			//_log.Debugf("i=%s", i)
 		}
 	}
 	app.Draw()
@@ -159,7 +159,7 @@ func stopAppAndReturnSelected(selected string) {
 }
 
 func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
-	//log.Debug("reached tabToSwitch")
+	//_log.Debug("reached tabToSwitch")
 	switch key.Key() {
 	case tcell.KeyCtrlH:
 		app.SetRoot(modal, false)
@@ -178,7 +178,7 @@ func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 }
 
 func interceptTable(key *tcell.EventKey) *tcell.EventKey {
-	//log.Debug("reached interceptTable")
+	//_log.Debug("reached interceptTable")
 	switch key.Key() {
 	case tcell.KeyCtrlH:
 		app.SetRoot(modal, false)

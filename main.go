@@ -19,27 +19,29 @@ import (
 
 // globals
 
-var wg sync.WaitGroup
-var log *logging.Logger
-var ec *nats.EncodedConn
-var cec *nats.EncodedConn // cloud encoded connection
-var db *gorm.DB
-var status Status
-var hostName string
-var currentUser *user.User
-var DBFILE string
+var _wg sync.WaitGroup
+var _log *logging.Logger
+var _ec *nats.EncodedConn
+var _cec *nats.EncodedConn // cloud encoded connection
+var _db *gorm.DB
+var _status Status
+var _hostName string
+var _currentUser *user.User
+var _dbfile string
 
 var BuildTime string
 var BuildVersion string
 var BuildCommit string
 var BuildNumber string
 
-var cronTab *cron.Cron
-var command string
+var _cronTab *cron.Cron
+var _command string
 
-var homedir string
+var _homedir string
 
-var verbose bool
+var _config Config
+
+var _verbose bool
 
 func init() {
 	var err error
@@ -49,45 +51,45 @@ func init() {
 		panic(err)
 	}
 	exPath := filepath.Dir(ex)
-	DBFILE = exPath + "/test.db"
+	_dbfile = exPath + "/test._"
 
 	// get hostname and user
-	hostName, err = os.Hostname()
+	_hostName, err = os.Hostname()
 	if err != nil {
 		panic(err)
 	}
-	currentUser, err = user.Current()
+	_currentUser, err = user.Current()
 	if err != nil {
 		panic(err)
 	}
 
 	currUser, err := user.Current()
 	if err != nil {
-		log.Fatal(err)
+		_log.Fatal(err)
 	}
 
-	homedir = currUser.HomeDir
+	_homedir = currUser.HomeDir
 
 	// SQLite DB via Gorm
-	dbconn, err := gorm.Open("sqlite3", DBFILE)
+	dbconn, err := gorm.Open("sqlite3", _dbfile)
 	if err != nil {
 		panic("failed to connect database")
 	}
 
 	// assign connection to global var
-	db = dbconn
+	_db = dbconn
 
 	// Migrate the schema
-	db.AutoMigrate(&Status{})
+	_db.AutoMigrate(&Status{})
 
 	//create a Status record if it doesn't exist
-	db.FirstOrCreate(&status, Status{One: "one"})
+	_db.FirstOrCreate(&_status, Status{One: "one"})
 
-	//db.Where("One = ?", "one").First(&status)
+	//_.Where("One = ?", "one").First(&_status)
 
-	//log.Noticef("DB after init= %+v", db)
+	//_log.Noticef("DB after init= %+v", _)
 
-	cronTab = cron.New()
+	_cronTab = cron.New()
 
 	// handle ^c (os.Interrupt)
 	c := make(chan os.Signal, 1)
@@ -106,7 +108,7 @@ func main() {
 	var cmdAccount = &cobra.Command{
 		Use:   "account",
 		Short: "Manage account on sherpa cloud",
-		Long:  "Account is a master command used to signup, signin, change or recover password and add or remove machines.",
+		Long:  "Account is a master _command used to signup, signin, change or recover password and add or remove machines.",
 		Args:  cobra.MinimumNArgs(0),
 		Run:   account,
 	}
@@ -177,7 +179,7 @@ func main() {
 		Run:   cmdDaemonize,
 	}
 
-	cmdDaemonize.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode, expect a lot of chat")
+	cmdDaemonize.Flags().BoolVarP(&_verbose, "_verbose", "v", false, "_verbose mode, expect a lot of chat")
 
 	var cmdHistory = &cobra.Command{
 		Use:   "history",
@@ -221,7 +223,7 @@ func main() {
 
 func handleSignals(c chan os.Signal) {
 	<-c
-	log.Noticef("Got os.Interrupt: cleaning up and exiting")
+	_log.Noticef("Got os.Interrupt: cleaning up and exiting")
 	shutdown()
 }
 
@@ -233,7 +235,7 @@ func shutdown() {
 func restart() {
 	cleanup()
 	if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
-		log.Error(err)
+		_log.Error(err)
 	}
 	os.Exit(1)
 }
@@ -247,19 +249,19 @@ func cleanup() {
 	/*	var cReq cleanupReq
 		cReq.Req = "cleanup"
 		var cRes cleanupRes
-		err := ec.Request("cleanup", cReq, &cRes, 100*time.Millisecond)
+		err := _ec.Request("cleanup", cReq, &cRes, 100*time.Millisecond)
 		if err != nil {
 			fmt.Printf("Request failed: %v\n", err)
 		}*/
 
-	log.Debugf("Cleanup: waiting 1 sec for subservers cleanup")
+	_log.Debugf("Cleanup: waiting 1 sec for subservers cleanup")
 	// give everyone globally 10 second to clean up everything
 	time.Sleep(1000000000)
 }
 
 func follow() {
 	for {
-		log.Noticef("%+v", db)
+		_log.Noticef("%+v", _db)
 		time.Sleep(3000000000)
 	}
 }

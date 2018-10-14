@@ -6,17 +6,17 @@ import (
 
 func cmdVersion(cmd *cobra.Command, args []string) {
 
-	command = "version"
+	_command = "version"
 	initLogs(false)
 
-	//log.Infof("reached version\n")
+	//_log.Infof("reached version\n")
 
 	/*	var entry HistoryEntry
-		db.FirstOrCreate(&entry, HistoryEntry{Entry: "cd ..", Host: "retina"})*/
-	log.Infof("Build number: %s", BuildNumber)
-	log.Infof("Build date: %s", BuildTime)
-	log.Infof("Build version: %s", BuildVersion)
-	log.Infof("Build git commit hash: %s", BuildCommit)
-	log.Infof("Target OS : %s", BUILDOS)
-	log.Infof("Target Architecture: %s", BUILDARCH)
+		_.FirstOrCreate(&entry, HistoryEntry{Entry: "cd ..", Host: "retina"})*/
+	_log.Infof("Build number: %s", BuildNumber)
+	_log.Infof("Build date: %s", BuildTime)
+	_log.Infof("Build version: %s", BuildVersion)
+	_log.Infof("Build git commit hash: %s", BuildCommit)
+	_log.Infof("Target OS : %s", BUILDOS)
+	_log.Infof("Target Architecture: %s", BUILDARCH)
 }

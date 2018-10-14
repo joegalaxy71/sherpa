@@ -17,17 +17,17 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 
 	var err error
 
-	initLogs(verbose)
+	initLogs(_verbose)
 
-	err = createConfigIfMissing()
+	_config, err = mustGetConfig()
 	if err != nil {
-		log.Infof("Unable to create dafault config file.")
+		_log.Infof("Config file is missing, unable to create dafault πconfig file.")
 		os.Exit(-1)
 	}
 
-	err = readConfig()
+	_config, err = readConfig()
 	if err != nil {
-		log.Infof("Unable to read from config file.")
+		_log.Infof("Unable to read from a πconfig file.")
 		os.Exit(-1)
 	}
 
@@ -35,24 +35,24 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 
 	err = initNATSClient()
 	if err != nil {
-		log.Infof("Unable to initialize NATS client.")
+		_log.Infof("Unable to initialize NATS client.")
 		os.Exit(-1)
 	}
 
 	err = initNATSCloudClient()
 	if err != nil {
-		log.Infof("Unable to initialize NATS cloud client.")
+		_log.Infof("Unable to initialize NATS cloud client.")
 		os.Exit(-1)
 	}
 
 	// nice to have cron jobs inside your executable
-	err = cronTab.AddFunc("*/60 * * * * *", updater)
+	err = _cronTab.AddFunc("*/60 * * * * *", updater)
 	if err != nil {
-		log.Infof("Unable to initialize CRON subsystemt.")
+		_log.Infof("Unable to initialize CRON subsystemt.")
 		os.Exit(-1)
 	}
 
-	cronTab.Start()
+	_cronTab.Start()
 
 	// init microServers
 
@@ -72,13 +72,13 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 		wg.Add(1)*/
 
 	// init complete
-	log.Debugf("Sherpa daemon init complete")
-	log.Debugf("Build #%s started", BuildNumber)
+	_log.Debugf("Sherpa daemon init complete")
+	_log.Debugf("Build #%s started", BuildNumber)
 
 	// wait for all the goroutines to end before exiting
 	// (should never exit) (exit only with signal.interrupt)
-	wg.Add(1)
-	wg.Wait()
+	_wg.Add(1)
+	_wg.Wait()
 }
 
 func initMicroServer(us microServer) error {
@@ -87,26 +87,26 @@ func initMicroServer(us microServer) error {
 
 	err := us.init()
 	if err == nil {
-		log.Debugf("%s microserver: init completed\n", us.name)
+		_log.Debugf("%s microserver: init completed\n", us.name)
 		return nil
 	} else {
-		log.Errorf("%s microserver: init failed, aborting\n", us.name)
+		_log.Errorf("%s microserver: init failed, aborting\n", us.name)
 		return err
 	}
 }
 
-func createConfigIfMissing() error {
-	log.Debugf("Checking existance of a valid config file")
+func OLDcreateConfigIfMissing() error {
+	_log.Debugf("Checking existance of a valid πconfig file")
 	var err error
 
-	configFile = homedir + "/.sherpa"
+	configFile = _homedir + "/.sherpa"
 
 	_, err = os.Open(configFile)
 	if err != nil {
 		// no file present, creating one
 		file, err := os.Create(configFile)
 		if err != nil {
-			log.Debugf("unable to create config file")
+			_log.Debugf("unable to create πconfig file")
 			return err
 		}
 		defer file.Close()
@@ -114,53 +114,21 @@ func createConfigIfMissing() error {
 		config := Config{}
 		data, err := yaml.Marshal(&config)
 		if err != nil {
-			log.Fatalf("error: %v", err)
+			_log.Fatalf("error: %v", err)
 		}
 		written, err := file.Write(data)
 		if err != nil {
-			log.Fatalf("error: %v", err)
+			_log.Fatalf("error: %v", err)
 		}
-		log.Debugf("Created new YAML config file: %v bytes written", written)
+		_log.Debugf("Created new YAML πconfig file: %v bytes written", written)
 	}
 
-	return nil
-}
-
-func readConfig() error {
-	log.Debugf("Reading config file")
-	var err error
-
-	configFile = homedir + "/.sherpa"
-
-	file, err := os.Open(configFile)
-	if err != nil {
-		return err
-	}
-
-	// create a pointer to an empty UpdateInfo
-	config := Config{}
-
-	// and pass is to a the YAML unmarshaler
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-
-	err = yaml.Unmarshal(bytes, &config)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-
-	log.Debugf("Unmarshaled config=%+v", config)
-
-	defer file.Close()
 	return nil
 }
 
 func updater() {
-	//TODO must check a version file containing the build number before downloading and applying the update
 
-	log.Debugf("Trying to update from build# %s", BuildNumber)
+	_log.Debugf("Trying to update from build# %s", BuildNumber)
 	// we check a secondary file containing the build number
 
 	baseUrl := "http://sherpa.avero.it/dist/" + BUILDOS + "_" + BUILDARCH + "/"
@@ -169,7 +137,7 @@ func updater() {
 	url := baseUrl + "sherpa.yaml"
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Errorf("Unable to fetch version file url")
+		_log.Errorf("Unable to fetch version file url")
 		return
 	}
 
@@ -179,17 +147,17 @@ func updater() {
 	// and pass is to a the YAML unmarshaler
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		_log.Fatalf("error: %v", err)
 	}
 
 	err = yaml.Unmarshal(bytes, &updateInfo)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		_log.Fatalf("error: %v", err)
 	}
 
-	//log.Debugf("parsed:%#v", updateInfo)
+	//_log.Debugf("parsed:%#v", updateInfo)
 
-	log.Debugf("Fileserver build #%s", updateInfo.BuildNumber)
+	_log.Debugf("Fileserver build #%s", updateInfo.BuildNumber)
 
 	currentBuildNumber, err := strconv.Atoi(BuildNumber)
 
@@ -200,24 +168,24 @@ func updater() {
 		// if cloud build number > build number
 		//	proceed with the update
 
-		log.Debugf("Updating to build#%s", updateInfo.BuildNumber)
+		_log.Debugf("Updating to build#%s", updateInfo.BuildNumber)
 
 		url := baseUrl + "sherpa"
 		resp, err := http.Get(url)
 		if err != nil {
-			log.Errorf("Unable to fetch update url")
+			_log.Errorf("Unable to fetch update url")
 			return
 		}
 		defer resp.Body.Close()
 		err = update.Apply(resp.Body, update.Options{})
 		if err != nil {
-			log.Errorf("Unable to update")
+			_log.Errorf("Unable to update")
 			println(err)
 			return
 		}
-		log.Infof("Sherpa has been updated. Restarting...")
+		_log.Infof("Sherpa has been updated. Restarting...")
 		restart()
 	} else {
-		log.Debugf("No need to update")
+		_log.Debugf("No need to update")
 	}
 }

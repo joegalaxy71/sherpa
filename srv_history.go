@@ -3,7 +3,7 @@ package main
 // SPECS
 // follow the history file
 // when a change is detected load the delta (shell only append)
-// and insert into sqlite db
+// and insert into sqlite _
 // use gorm and gorm defaults, so all records will have automatically "created at"
 
 import (
@@ -23,7 +23,7 @@ var watcher *fsnotify.Watcher
 
 func historyInit() error {
 
-	historyFile = homedir + "/.bash_history"
+	historyFile = _homedir + "/.bash_history"
 
 	watchHistory()
 
@@ -52,7 +52,7 @@ func watchHistory() {
 	// we create a watcher to watch the history file
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		_log.Fatal(err)
 	}
 
 	// we create and launch a goroutine to persist after init
@@ -60,26 +60,26 @@ func watchHistory() {
 		for {
 			select {
 			case event := <-watcher.Events:
-				//log.Debugf("event: %s", event)
+				//_log.Debugf("event: %s", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Debugf("modified file: %s", event.Name)
+					_log.Debugf("modified file: %s", event.Name)
 					err := updateEntriesDB()
 					if err != nil {
-						log.Errorf("Error:%s", err)
+						_log.Errorf("Error:%s", err)
 					}
 				}
 			case err := <-watcher.Errors:
-				log.Debugf("error: %s", err)
+				_log.Debugf("error: %s", err)
 			}
 		}
 	}()
 
-	//we launch manually the first db update
+	//we launch manually the first _ update
 	updateEntriesDB()
 
 	err = watcher.Add(historyFile)
 	if err != nil {
-		log.Error(err)
+		_log.Error(err)
 	}
 }
 
@@ -111,23 +111,23 @@ func updateEntriesDB() error {
 	var readFrom int64
 
 	//check if size is bigger that the read part or
-	if status.HistFrom == 0 {
-		log.Debugf("history file never read before")
+	if _status.HistFrom == 0 {
+		_log.Debugf("history file never read before")
 		// the chunk we read == file size (real all file)
 		chunk = size
 		readFrom = 0
-	} else if size < status.HistFrom {
+	} else if size < _status.HistFrom {
 		//if read part = 0 (never read before)
-		log.Debugf("history file size < of part already read, reading whole file")
+		_log.Debugf("history file size < of part already read, reading whole file")
 		// the chunk we read == file size (real all file)
 		chunk = size
 		readFrom = 0
 	} else {
 		//calculate chunk to read
-		log.Debugf("history file size > of part already read, reading delta")
+		_log.Debugf("history file size > of part already read, reading delta")
 
-		chunk = size - status.HistFrom
-		readFrom = status.HistFrom
+		chunk = size - _status.HistFrom
+		readFrom = _status.HistFrom
 
 	}
 
@@ -137,7 +137,7 @@ func updateEntriesDB() error {
 	// seek to HistFrom
 
 	newPosition, err := file.Seek(int64(readFrom), whence)
-	log.Debugf("New position is: %v", newPosition)
+	_log.Debugf("New position is: %v", newPosition)
 	if err != nil {
 		return err
 	}
@@ -147,50 +147,50 @@ func updateEntriesDB() error {
 	// error if the file is smaller than the byte slice.
 	byteSlice := make([]byte, chunk)
 	numBytesRead, err := file.Read(byteSlice)
-	log.Debugf("Read %v bytes from %s", numBytesRead, fileInfo.Name())
+	_log.Debugf("Read %v bytes from %s", numBytesRead, fileInfo.Name())
 	if err != nil {
 		return err
 	}
 
 	//s := string(byteSlice[:])
 
-	//log.Warningf("Read: %s", s)
-	// update status whit the info about the new read part
-	status.HistFrom = size
+	//_log.Warningf("Read: %s", s)
+	// update _status whit the info about the new read part
+	_status.HistFrom = size
 
-	//always keep the status in a global var
+	//always keep the _status in a global var
 
-	//db.First(&status, "one = ?", "one")
+	//_.First(&_status, "one = ?", "one")
 
-	//db.Model(&status).Update("HistFrom", uint32(size))
+	//_.Model(&_status).Update("HistFrom", uint32(size))
 
-	//status.HistFrom = size
+	//_status.HistFrom = size
 
-	//log.Debugf("%+v", db)
+	//_log.Debugf("%+v", _)
 
 	//start := time.Now()
 
 	// typecats to string, then split by newline into a []string
 	inputStrings := strings.Split(string(byteSlice), "\n")
-	log.Debugf("inputstsrings len()=%v, cap()=%v", len(inputStrings), cap(inputStrings))
+	_log.Debugf("inputstsrings len()=%v, cap()=%v", len(inputStrings), cap(inputStrings))
 
-	// no need to sort (it's a db work) or remove duplicates (they're needed)
-	// write them to the db
+	// no need to sort (it's a _ work) or remove duplicates (they're needed)
+	// write them to the _
 
 	var cloudUpdated = true
 
 	for _, entry := range inputStrings {
 		if entry != "" {
-			//log.Debugf("entry=%s, host=%s", entry, "retina")
+			//_log.Debugf("entry=%s, host=%s", entry, "retina")
 
 			var he historyNew
 			he.Account = "account"
 			he.Entry = entry
-			he.UserAtHost = currentUser.Username + "@" + hostName
+			he.UserAtHost = _currentUser.Username + "@" + _hostName
 
 			var res response
 
-			err = cec.Request("history-new", he, &res, 1000*time.Millisecond)
+			err = _cec.Request("history-new", he, &res, 1000*time.Millisecond)
 			if err != nil {
 				cloudUpdated = false
 			}
@@ -198,7 +198,7 @@ func updateEntriesDB() error {
 	}
 
 	if cloudUpdated == true {
-		db.Save(&status)
+		_db.Save(&_status)
 	}
 
 	test()

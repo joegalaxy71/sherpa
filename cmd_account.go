@@ -12,29 +12,36 @@ import (
 )
 
 func account(cmd *cobra.Command, args []string) {
-	initLogs(verbose)
-	log.Infof("reached 'sherpa account'")
+	initLogs(_verbose)
+	_log.Infof("reached 'sherpa account'")
 }
 
 func accountLogin(cmd *cobra.Command, args []string) {
 
 	initLogs(true)
 
+	var err error
+	_config, err = mustGetConfig()
+	if err != nil {
+		_log.Debugf("unable to either read a config or create a default one")
+		os.Exit(-1)
+	}
+
 	initNATSClient()
 	initNATSCloudClient()
 
-	log.Infof("reached 'sherpa account login'")
+	_log.Infof("reached 'sherpa account login'")
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter account email: ")
 	email, err := reader.ReadString('\n')
 	if err != nil {
-		log.Fatalf("Error reading from stdin")
+		_log.Fatalf("Error reading from stdin")
 	}
 
 	fmt.Println("Enter account password: ")
 	password, err := reader.ReadString('\n')
 	if err != nil {
-		log.Fatalf("Error reading from stdin")
+		_log.Fatalf("Error reading from stdin")
 	}
 
 	//fmt.Printf("Email:%s, Password:%s, Pass sha256", email, password, pass_hashed)
@@ -46,16 +53,23 @@ func accountLogin(cmd *cobra.Command, args []string) {
 	alReq.Email = email
 	alReq.Password = password
 
-	err = cec.Request("account-login", alReq, &alRes, 1000*time.Millisecond)
+	err = _cec.Request("account-login", alReq, &alRes, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
 		fmt.Printf("Request sent")
 		if alRes.Status == true {
-			log.Debugf("csherpa said: logged in")
-			// store APIKey inside sherpa config file
+			_log.Debugf("csherpa said: logged in")
+			// store APIKey inside sherpa πconfig file
+
+			//config, err := readConfig()
+
+			_config.APIKey = alRes.APIKey
+
+			writeConfig(_config)
+
 		} else {
-			log.Debugf("csherpa said: wrong email or password")
+			_log.Debugf("csherpa said: wrong email or password")
 		}
 	}
 }
@@ -67,18 +81,18 @@ func accountCreate(cmd *cobra.Command, args []string) {
 	initNATSClient()
 	initNATSCloudClient()
 
-	log.Infof("reached 'sherpa account create'")
+	_log.Infof("reached 'sherpa account create'")
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter account email: ")
 	email, err := reader.ReadString('\n')
 	if err != nil {
-		log.Fatalf("Error reading from stdin")
+		_log.Fatalf("Error reading from stdin")
 	}
 
 	fmt.Println("Enter account password: ")
 	password, err := reader.ReadString('\n')
 	if err != nil {
-		log.Fatalf("Error reading from stdin")
+		_log.Fatalf("Error reading from stdin")
 	}
 
 	h := sha256.New()
@@ -94,40 +108,40 @@ func accountCreate(cmd *cobra.Command, args []string) {
 	acReq.Email = email
 	acReq.Password = password
 
-	err = cec.Request("account-create", acReq, &acRes, 5000*time.Millisecond)
+	err = _cec.Request("account-create", acReq, &acRes, 5000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
 		fmt.Printf("Request sent")
 		if acRes.Status == true {
-			log.Debugf("csherpa said: created")
+			_log.Debugf("csherpa said: created")
 		} else {
-			log.Debugf("csherpa said: already existing")
+			_log.Debugf("csherpa said: already existing")
 		}
 	}
 }
 
 func accountInfo(cmd *cobra.Command, args []string) {
-	initLogs(verbose)
-	log.Infof("reached 'sherpa account info'")
+	initLogs(_verbose)
+	_log.Infof("reached 'sherpa account info'")
 }
 
 func accountPassword(cmd *cobra.Command, args []string) {
-	initLogs(verbose)
-	log.Infof("reached 'sherpa account password'")
+	initLogs(_verbose)
+	_log.Infof("reached 'sherpa account password'")
 }
 
 func accountPasswordChange(cmd *cobra.Command, args []string) {
-	initLogs(verbose)
-	log.Infof("reached 'sherpa account password change'")
+	initLogs(_verbose)
+	_log.Infof("reached 'sherpa account password change'")
 }
 
 func accountPasswordRecover(cmd *cobra.Command, args []string) {
-	initLogs(verbose)
-	log.Infof("reached 'sherpa account password recover'")
+	initLogs(_verbose)
+	_log.Infof("reached 'sherpa account password recover'")
 }
 
 func accountPasswordReset(cmd *cobra.Command, args []string) {
-	initLogs(verbose)
-	log.Infof("reached 'sherpa account password reset'")
+	initLogs(_verbose)
+	_log.Infof("reached 'sherpa account password reset'")
 }

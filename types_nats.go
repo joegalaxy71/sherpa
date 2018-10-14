@@ -43,3 +43,16 @@ type accountCreateRes struct {
 	Status  bool
 	Message string
 }
+
+// login
+
+type accountLoginReq struct {
+	Email    string
+	Password string
+}
+
+type accountLoginRes struct {
+	Status  bool
+	Message string
+	APIKey  string
+}

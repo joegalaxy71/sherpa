@@ -13,7 +13,8 @@ import (
 var configFile string
 
 func cmdDaemonize(cmd *cobra.Command, args []string) {
-	//var args_empty = []string{""}
+
+	_command = "daemonize"
 
 	var err error
 

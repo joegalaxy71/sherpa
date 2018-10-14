@@ -6,7 +6,7 @@ import (
 
 func cmdPrompt(cmd *cobra.Command, args []string) {
 
-	//TODO: implement everything
+	_command = "prompt"
 
 	initLogs(false)
 

@@ -18,6 +18,8 @@ func account(cmd *cobra.Command, args []string) {
 
 func accountLogin(cmd *cobra.Command, args []string) {
 
+	_command = "account/login"
+
 	initLogs(true)
 
 	var err error
@@ -75,6 +77,8 @@ func accountLogin(cmd *cobra.Command, args []string) {
 }
 
 func accountCreate(cmd *cobra.Command, args []string) {
+
+	_command = "acount/create"
 
 	initLogs(true)
 

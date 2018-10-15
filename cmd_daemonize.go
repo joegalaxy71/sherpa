@@ -55,22 +55,10 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 
 	_cronTab.Start()
 
-	// init microServers
-
-	//go initHistory()
-	//wg.Add(1)
-
-	microServers := []microServer{
-		{"history", historyInit, historyCleanup},
-		{"prompt", promptInit, promptCleanup},
-	}
-
-	for _, uServer := range microServers {
+	// init _microServers
+	for _, uServer := range _microServers {
 		initMicroServer(uServer)
 	}
-
-	/*	go initMicroServer(history)
-		wg.Add(1)*/
 
 	// init complete
 	_log.Debugf("Sherpa daemon init complete")
@@ -84,7 +72,7 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 
 func initMicroServer(us microServer) error {
 
-	initNATSClient()
+	//initNATSClient()
 
 	err := us.init()
 	if err == nil {
@@ -96,8 +84,20 @@ func initMicroServer(us microServer) error {
 	}
 }
 
+func cleanupMicroServer(us microServer) error {
+
+	err := us.cleanup()
+	if err == nil {
+		_log.Debugf("%s microserver: cleanup completed\n", us.name)
+		return nil
+	} else {
+		_log.Errorf("%s microserver: cleanup failed, aborting\n", us.name)
+		return err
+	}
+}
+
 func OLDcreateConfigIfMissing() error {
-	_log.Debugf("Checking existance of a valid πconfig file")
+	_log.Debugf("Checking existance of a valid config file")
 	var err error
 
 	configFile = _homedir + "/.sherpa"
@@ -107,7 +107,7 @@ func OLDcreateConfigIfMissing() error {
 		// no file present, creating one
 		file, err := os.Create(configFile)
 		if err != nil {
-			_log.Debugf("unable to create πconfig file")
+			_log.Debugf("unable to create config file")
 			return err
 		}
 		defer file.Close()
@@ -121,7 +121,7 @@ func OLDcreateConfigIfMissing() error {
 		if err != nil {
 			_log.Fatalf("error: %v", err)
 		}
-		_log.Debugf("Created new YAML πconfig file: %v bytes written", written)
+		_log.Debugf("Created new YAML config file: %v bytes written", written)
 	}
 
 	return nil

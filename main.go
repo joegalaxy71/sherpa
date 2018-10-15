@@ -29,6 +29,8 @@ var _hostName string
 var _currentUser *user.User
 var _dbfile string
 
+var _microServers []microServer
+
 var BuildTime string
 var BuildVersion string
 var BuildCommit string
@@ -69,6 +71,11 @@ func init() {
 	}
 
 	_homedir = currUser.HomeDir
+
+	_microServers = []microServer{
+		{"history", historyInit, historyCleanup},
+		{"prompt", promptInit, promptCleanup},
+	}
 
 	// SQLite DB via Gorm
 	dbconn, err := gorm.Open("sqlite3", _dbfile)
@@ -228,7 +235,9 @@ func handleSignals(c chan os.Signal) {
 }
 
 func shutdown() {
-	cleanup()
+	if _command == "daemonize" {
+		cleanup()
+	}
 	os.Exit(1)
 }
 
@@ -241,7 +250,6 @@ func restart() {
 }
 
 func cleanup() {
-	//TODO: which way to close microservers? a global mode switch (server/client?)
 	// the following block, including the wait time, should be executed (and cleanup message sent) only if server
 
 	// telling all microservers to cleanup before forcibly exiting
@@ -255,7 +263,11 @@ func cleanup() {
 		}*/
 
 	_log.Debugf("Cleanup: waiting 1 sec for subservers cleanup")
-	// give everyone globally 10 second to clean up everything
+
+	for _, uServer := range _microServers {
+		cleanupMicroServer(uServer)
+	}
+	// give everyone globally 1 second to clean up everything
 	time.Sleep(1000000000)
 }
 

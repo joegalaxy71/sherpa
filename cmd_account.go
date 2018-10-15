@@ -29,7 +29,7 @@ func accountLogin(cmd *cobra.Command, args []string) {
 		os.Exit(-1)
 	}
 
-	initNATSClient()
+	//initNATSClient()
 	initNATSCloudClient()
 
 	_log.Infof("reached 'sherpa account login'")
@@ -67,8 +67,13 @@ func accountLogin(cmd *cobra.Command, args []string) {
 			//config, err := readConfig()
 
 			_config.APIKey = alRes.APIKey
+			_log.Debugf("received APIKey=%s", alRes.APIKey)
 
-			writeConfig(_config)
+			_, err = writeConfig(_config)
+			if err != nil {
+				_log.Debugf("failed to update config file")
+				_log.Debugf("err=%+v", err)
+			}
 
 		} else {
 			_log.Debugf("csherpa said: wrong email or password")

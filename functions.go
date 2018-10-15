@@ -123,15 +123,18 @@ func readConfig() (Config, error) {
 }
 
 func writeConfig(config Config) (Config, error) {
-	_log.Debugf("Reading πconfig file")
+	_log.Debugf("Writing πconfig file")
 
 	var err error
 
 	configFile = _homedir + "/.sherpa"
 
-	file, err := os.Open(configFile)
+	_log.Debugf("configFile=%s", configFile)
+
+	file, err := os.OpenFile(configFile, os.O_RDWR, 0666)
 	if err != nil {
 		// return  πconfig and an error
+		_log.Debugf("failed to open")
 		return config, err
 	}
 
@@ -139,6 +142,7 @@ func writeConfig(config Config) (Config, error) {
 	err = file.Truncate(0)
 	if err != nil {
 		// return  πconfig and an error
+		_log.Debugf("failed to truncate")
 		return config, err
 	}
 
@@ -146,6 +150,7 @@ func writeConfig(config Config) (Config, error) {
 	_, err = file.Seek(0, 0)
 	if err != nil {
 		// return  πconfig and an error
+		_log.Debugf("failed to seek")
 		return config, err
 	}
 
@@ -153,15 +158,23 @@ func writeConfig(config Config) (Config, error) {
 	bytes, err := yaml.Marshal(config)
 	if err != nil {
 		// return a zeroed πconfig and an error
+		_log.Debugf("failed to yaml.Marshal")
 		return config, err
 	}
 
 	// write the []byte to file
 	_, err = file.Write(bytes)
+	if err != nil {
+		// return a zeroed πconfig and an error
+		_log.Debugf("failed to write")
+		return config, err
+	}
 
 	err = file.Close()
 	if err != nil {
 		// return a zeroed πconfig and an error
+		_log.Debugf("failed to close")
+
 		return config, err
 	}
 

@@ -29,7 +29,7 @@ func accountLogin(cmd *cobra.Command, args []string) {
 		os.Exit(-1)
 	}
 
-	//initNATSClient()
+	initNATSClient()
 	initNATSCloudClient()
 
 	_log.Infof("reached 'sherpa account login'")
@@ -74,7 +74,6 @@ func accountLogin(cmd *cobra.Command, args []string) {
 				_log.Debugf("failed to update config file")
 				_log.Debugf("err=%+v", err)
 			}
-
 		} else {
 			_log.Debugf("csherpa said: wrong email or password")
 		}

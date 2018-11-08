@@ -184,7 +184,7 @@ func updateEntriesDB() error {
 			//_log.Debugf("entry=%s, host=%s", entry, "retina")
 
 			var he historyNew
-			he.Account = "account"
+			he.APIKey = _config.APIKey
 			he.Entry = entry
 			he.UserAtHost = _currentUser.Username + "@" + _hostName
 

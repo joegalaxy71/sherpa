@@ -21,7 +21,7 @@ type historyResults struct {
 }
 
 type historyNew struct {
-	Account    string
+	APIKey     string
 	Entry      string
 	UserAtHost string
 	CreatedAt  time.Time

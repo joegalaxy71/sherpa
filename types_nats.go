@@ -13,7 +13,8 @@ type response struct {
 // HISTORY
 
 type historyQuery struct {
-	Query string
+	APIKey string
+	Query  string
 }
 
 type historyResults struct {

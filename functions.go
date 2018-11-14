@@ -182,7 +182,7 @@ func writeConfig(config Config) (Config, error) {
 }
 
 func mustGetConfig() (Config, error) {
-	_log.Debugf("Checking existance of a valid πconfig file")
+	_log.Debugf("Checking existance of a valid config file")
 	var err error
 
 	config, err := readConfig()
@@ -190,7 +190,7 @@ func mustGetConfig() (Config, error) {
 		_log.Debugf("unable to read πconfig file")
 		config, err = writeConfig(config)
 		if err != nil {
-			_log.Debugf("unable to create πconfig file")
+			_log.Debugf("unable to create config file")
 			return config, err
 		} else {
 			// return zeroed πconfig in any case

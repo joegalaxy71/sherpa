@@ -184,6 +184,7 @@ func updateEntriesDB() error {
 			//_log.Debugf("entry=%s, host=%s", entry, "retina")
 
 			var he historyNew
+			_log.Debugf("APIOKey=%s", _config.APIKey)
 			he.APIKey = _config.APIKey
 			he.Entry = entry
 			he.UserAtHost = _currentUser.Username + "@" + _hostName

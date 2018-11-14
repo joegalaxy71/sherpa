@@ -53,7 +53,7 @@ func init() {
 		panic(err)
 	}
 	exPath := filepath.Dir(ex)
-	_dbfile = exPath + "/test._"
+	_dbfile = exPath + "/sherpa.db"
 
 	// get hostname and user
 	_hostName, err = os.Hostname()

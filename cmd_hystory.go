@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	_ "strings"
 	"time"
@@ -60,6 +61,20 @@ func cmdHistory(cmd *cobra.Command, args []string) {
 
 	initLogs(false)
 
+	var err error
+
+	_config, err = mustGetConfig()
+	if err != nil {
+		_log.Infof("Config file is missing, unable to create dafault πconfig file.")
+		os.Exit(-1)
+	}
+
+	_config, err = readConfig()
+	if err != nil {
+		_log.Infof("Unable to read from a πconfig file.")
+		os.Exit(-1)
+	}
+
 	initNATSClient()
 	initNATSCloudClient()
 
@@ -111,6 +126,7 @@ func updateList(changed string) {
 	//var res response
 	var hq historyQuery
 	hq.Query = changed
+	hq.APIKey = _config.APIKey
 
 	err := _cec.Request("history-req", hq, &res, 1000*time.Millisecond)
 	if err != nil {

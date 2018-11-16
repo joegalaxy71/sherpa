@@ -8,7 +8,7 @@ func cmdPrompt(cmd *cobra.Command, args []string) {
 
 	_command = "prompt"
 
-	initLogs(false)
+	initLogs(_verbose)
 
 	// SERVER PART
 	// * open the history files and read the file into a []string

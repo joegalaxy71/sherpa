@@ -32,6 +32,17 @@ type historyNewResp struct {
 	Error error
 }
 
+// PROMPT
+
+type promptQuery struct {
+	APIKey string
+	Query  string
+}
+
+type PromptResults struct {
+	PromptEntries []HistoryEntry
+}
+
 // ACCOUNT
 // create
 

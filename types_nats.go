@@ -39,8 +39,8 @@ type promptQuery struct {
 	Query  string
 }
 
-type PromptResults struct {
-	PromptEntries []HistoryEntry
+type promptResults struct {
+	PromptEntries []Prompt
 }
 
 // ACCOUNT

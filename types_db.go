@@ -16,3 +16,11 @@ type HistoryEntry struct {
 	Entry      string
 	UserAtHost string
 }
+
+type Prompt struct {
+	gorm.Model
+	Name     string
+	Tag      string
+	Preview  string
+	Sequence string
+}

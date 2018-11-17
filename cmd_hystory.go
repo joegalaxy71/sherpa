@@ -37,7 +37,7 @@ var modal *tview.Modal
 var flex *tview.Flex
 var app *tview.Application
 var focused *tview.Box
-var res historyResults
+var hRes historyResults
 
 func cmdHistory(cmd *cobra.Command, args []string) {
 
@@ -128,7 +128,7 @@ func updateList(changed string) {
 	hq.Query = changed
 	hq.APIKey = _config.APIKey
 
-	err := _cec.Request("history-req", hq, &res, 1000*time.Millisecond)
+	err := _cec.Request("history-req", hq, &hRes, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
@@ -140,7 +140,7 @@ func updateList(changed string) {
 		entries.SetCell(0, 1, tview.NewTableCell("[white]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
 		entries.SetCell(0, 2, tview.NewTableCell("[white]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
 
-		for i, entry := range res.HistoryEntries {
+		for i, entry := range hRes.HistoryEntries {
 			colorized := colorize(entry.Entry, hq.Query)
 			entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
 			entries.SetCell(i+1, 1, tview.NewTableCell("[red]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
@@ -207,7 +207,7 @@ func interceptTable(key *tcell.EventKey) *tcell.EventKey {
 		//stopAppAndReturnSelected(entries.GetCell(r, c).Text)
 		// we subtract 1 because array[] starts at 0, column at 1
 		// and another because there's a header row @ position 0
-		stopAppAndReturnSelected(res.HistoryEntries[r-1].Entry)
+		stopAppAndReturnSelected(hRes.HistoryEntries[r-1].Entry)
 	case tcell.KeyEsc:
 		app.Stop()
 	}

@@ -25,6 +25,7 @@ import (
 
 var queryField *tview.InputField
 var prompts *tview.Table
+var pRes promptResults
 
 func cmdPrompt(cmd *cobra.Command, args []string) {
 
@@ -94,28 +95,27 @@ func terminalPrompt() {
 
 func updatePromptList(changed string) {
 	// Requests
-	//var res response
-	var hq historyQuery
-	hq.Query = changed
-	hq.APIKey = _config.APIKey
+	var pq promptQuery
+	pq.Query = changed
+	pq.APIKey = _config.APIKey
 
-	err := _cec.Request("history-req", hq, &res, 1000*time.Millisecond)
+	err := _cec.Request("prompt-req", pq, &pRes, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
 		// delete all entries
-		entries.Clear()
+		prompts.Clear()
 
 		// add header row
-		entries.SetCell(0, 0, tview.NewTableCell("[white]COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
-		entries.SetCell(0, 1, tview.NewTableCell("[white]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
-		entries.SetCell(0, 2, tview.NewTableCell("[white]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
+		prompts.SetCell(0, 0, tview.NewTableCell("[white]NAME").SetAlign(tview.AlignLeft).SetSelectable(false))
+		prompts.SetCell(0, 1, tview.NewTableCell("[white]TAGS").SetAlign(tview.AlignCenter).SetSelectable(false))
+		prompts.SetCell(0, 2, tview.NewTableCell("[white]SAMPLE").SetAlign(tview.AlignRight).SetSelectable(false))
 
-		for i, entry := range res.HistoryEntries {
-			colorized := colorize(entry.Entry, hq.Query)
-			entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
-			entries.SetCell(i+1, 1, tview.NewTableCell("[red]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
-			entries.SetCell(i+1, 2, tview.NewTableCell("[red]"+entry.UserAtHost).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
+		for i, prompt := range pRes.PromptEntries {
+			colorized := colorizePrompt(prompt.Name, pq.Query)
+			prompts.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
+			prompts.SetCell(i+1, 1, tview.NewTableCell("[red]"+prompt.Tag).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
+			prompts.SetCell(i+1, 2, tview.NewTableCell("[red]"+prompt.Preview).SetAlign(tview.AlignRight))
 			//_log.Debugf("i=%s", i)
 		}
 	}
@@ -155,7 +155,7 @@ func interceptQueryField(key *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyDown:
 		app.SetFocus(prompts)
 	case tcell.KeyBacktab:
-		app.SetFocus(entries)
+		app.SetFocus(prompts)
 	case tcell.KeyEnter:
 		stopAppAndReturnSelectedPrompt(queryField.GetText())
 	case tcell.KeyEsc:
@@ -174,11 +174,11 @@ func interceptPromptTable(key *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyBacktab:
 		app.SetFocus(inputField)
 	case tcell.KeyEnter:
-		r, _ := entries.GetSelection()
-		//stopAppAndReturnSelected(entries.GetCell(r, c).Text)
+		r, _ := prompts.GetSelection()
+		//stopAppAndReturnSelected(prompt.GetCell(r, c).Text)
 		// we subtract 1 because array[] starts at 0, column at 1
 		// and another because there's a header row @ position 0
-		stopAppAndReturnSelected(res.HistoryEntries[r-1].Entry)
+		stopAppAndReturnSelected(pRes.PromptEntries[r-1].Sequence)
 	case tcell.KeyEsc:
 		app.Stop()
 	}

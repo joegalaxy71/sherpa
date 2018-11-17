@@ -187,7 +187,7 @@ func mustGetConfig() (Config, error) {
 
 	config, err := readConfig()
 	if err != nil {
-		_log.Debugf("unable to read πconfig file")
+		_log.Debugf("unable to read config file")
 		config, err = writeConfig(config)
 		if err != nil {
 			_log.Debugf("unable to create config file")
@@ -199,11 +199,4 @@ func mustGetConfig() (Config, error) {
 	}
 
 	return config, err
-}
-
-func OldhandleErr(err error, msg string) {
-	if err != nil {
-		_log.Errorf(msg)
-		os.Exit(-1)
-	}
 }

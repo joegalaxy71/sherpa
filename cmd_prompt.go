@@ -170,9 +170,9 @@ func interceptPromptTable(key *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyCtrlH:
 		app.SetRoot(modal, false)
 	case tcell.KeyTAB:
-		app.SetFocus(inputField)
+		app.SetFocus(queryField)
 	case tcell.KeyBacktab:
-		app.SetFocus(inputField)
+		app.SetFocus(queryField)
 	case tcell.KeyEnter:
 		r, _ := prompts.GetSelection()
 		//stopAppAndReturnSelected(prompt.GetCell(r, c).Text)

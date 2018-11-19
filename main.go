@@ -13,6 +13,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/nats-io/nats"
 	"github.com/op/go-logging"
+	"github.com/rivo/tview"
 	"github.com/robfig/cron"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +31,11 @@ var _currentUser *user.User
 var _dbfile string
 
 var _microServers []microServer
+
+// types common to all terminal apps
+var _modal *tview.Modal
+var _flex *tview.Flex
+var _app *tview.Application
 
 var BuildTime string
 var BuildVersion string

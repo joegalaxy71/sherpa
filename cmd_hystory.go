@@ -31,13 +31,11 @@ import (
 	//"github.com/kr/pty"
 )
 
-var inputField *tview.InputField
-var entries *tview.Table
-var modal *tview.Modal
-var flex *tview.Flex
-var app *tview.Application
-var focused *tview.Box
-var hRes historyResults
+var _inputField *tview.InputField
+var _entries *tview.Table
+
+var _focused *tview.Box
+var _hRes historyResults
 
 func cmdHistory(cmd *cobra.Command, args []string) {
 
@@ -83,40 +81,40 @@ func cmdHistory(cmd *cobra.Command, args []string) {
 
 func terminalHistory() {
 
-	app = tview.NewApplication()
+	_app = tview.NewApplication()
 
 	// text (separator)
 	help := tview.NewTextView().SetDynamicColors(true)
 	fmt.Fprintf(help, "[white]sherpa [red]history [gray] <<Search in global history>> ^h = help")
 
 	//inputfield (history incremental partial match prompt)
-	inputField = tview.NewInputField().SetLabel("[white]isearch ").SetChangedFunc(updateList)
-	inputField.SetInputCapture(interceptInputField)
-	inputField.SetBorder(true)
+	_inputField = tview.NewInputField().SetLabel("[white]isearch ").SetChangedFunc(updateList)
+	_inputField.SetInputCapture(interceptInputField)
+	_inputField.SetBorder(true)
 
 	// table (history list)
-	entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)
-	entries.SetCell(0, 0, tview.NewTableCell("start typing to populate list...").SetAlign(tview.AlignLeft))
-	entries.SetInputCapture(interceptTable).SetBorder(true)
+	_entries = tview.NewTable().SetBorders(false).SetSelectable(true, false)
+	_entries.SetCell(0, 0, tview.NewTableCell("start typing to populate list...").SetAlign(tview.AlignLeft))
+	_entries.SetInputCapture(interceptTable).SetBorder(true)
 
-	// modal for help
-	modal = tview.NewModal().
+	// _modal for help
+	_modal = tview.NewModal().
 		SetText("Use TAB to switch between the panes, ENTER to paste history _command on terminal, ESC to exit").
 		AddButtons([]string{"Ok"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			if buttonLabel == "Ok" {
-				app.SetRoot(flex, true)
+				_app.SetRoot(_flex, true)
 			}
 		})
 
-	// flex
-	flex = tview.NewFlex().SetDirection(tview.FlexRow).
+	// _flex
+	_flex = tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(help, 1, 1, false).
-		AddItem(inputField, 3, 1, true).
-		AddItem(entries, 0, 6, false)
+		AddItem(_inputField, 3, 1, true).
+		AddItem(_entries, 0, 6, false)
 
-	// run flex
-	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
+	// run _flex
+	if err := _app.SetRoot(_flex, true).SetFocus(_flex).Run(); err != nil {
 		panic(err)
 	}
 }
@@ -128,27 +126,27 @@ func updateList(changed string) {
 	hq.Query = changed
 	hq.APIKey = _config.APIKey
 
-	err := _cec.Request("history-req", hq, &hRes, 1000*time.Millisecond)
+	err := _cec.Request("history-req", hq, &_hRes, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
-		// delete all entries
-		entries.Clear()
+		// delete all _entries
+		_entries.Clear()
 
 		// add header row
-		entries.SetCell(0, 0, tview.NewTableCell("[white]COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
-		entries.SetCell(0, 1, tview.NewTableCell("[white]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
-		entries.SetCell(0, 2, tview.NewTableCell("[white]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
+		_entries.SetCell(0, 0, tview.NewTableCell("[white]COMMAND").SetAlign(tview.AlignLeft).SetSelectable(false))
+		_entries.SetCell(0, 1, tview.NewTableCell("[white]TIME").SetAlign(tview.AlignCenter).SetSelectable(false))
+		_entries.SetCell(0, 2, tview.NewTableCell("[white]USR@HOST").SetAlign(tview.AlignRight).SetSelectable(false))
 
-		for i, entry := range hRes.HistoryEntries {
+		for i, entry := range _hRes.HistoryEntries {
 			colorized := colorize(entry.Entry, hq.Query)
-			entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
-			entries.SetCell(i+1, 1, tview.NewTableCell("[red]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
-			entries.SetCell(i+1, 2, tview.NewTableCell("[red]"+entry.UserAtHost).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
+			_entries.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
+			_entries.SetCell(i+1, 1, tview.NewTableCell("[red]"+entry.CreatedAt.Format("2006-01-02 15:04:05")).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
+			_entries.SetCell(i+1, 2, tview.NewTableCell("[red]"+entry.UserAtHost).SetAlign(tview.AlignRight).SetTextColor(tcell.ColorBeige))
 			//_log.Debugf("i=%s", i)
 		}
 	}
-	app.Draw()
+	_app.Draw()
 }
 
 func colorize(entry, req string) string {
@@ -158,7 +156,7 @@ func colorize(entry, req string) string {
 }
 
 func stopAppAndReturnSelected(selected string) {
-	app.Stop()
+	_app.Stop()
 
 	//C.echo_off()
 
@@ -178,17 +176,17 @@ func interceptInputField(key *tcell.EventKey) *tcell.EventKey {
 	//_log.Debug("reached tabToSwitch")
 	switch key.Key() {
 	case tcell.KeyCtrlH:
-		app.SetRoot(modal, false)
+		_app.SetRoot(_modal, false)
 	case tcell.KeyTAB:
-		app.SetFocus(entries)
+		_app.SetFocus(_entries)
 	case tcell.KeyDown:
-		app.SetFocus(entries)
+		_app.SetFocus(_entries)
 	case tcell.KeyBacktab:
-		app.SetFocus(entries)
+		_app.SetFocus(_entries)
 	case tcell.KeyEnter:
-		stopAppAndReturnSelected(inputField.GetText())
+		stopAppAndReturnSelected(_inputField.GetText())
 	case tcell.KeyEsc:
-		app.Stop()
+		_app.Stop()
 	}
 	return key
 }
@@ -197,19 +195,19 @@ func interceptTable(key *tcell.EventKey) *tcell.EventKey {
 	//_log.Debug("reached interceptTable")
 	switch key.Key() {
 	case tcell.KeyCtrlH:
-		app.SetRoot(modal, false)
+		_app.SetRoot(_modal, false)
 	case tcell.KeyTAB:
-		app.SetFocus(inputField)
+		_app.SetFocus(_inputField)
 	case tcell.KeyBacktab:
-		app.SetFocus(inputField)
+		_app.SetFocus(_inputField)
 	case tcell.KeyEnter:
-		r, _ := entries.GetSelection()
-		//stopAppAndReturnSelected(entries.GetCell(r, c).Text)
+		r, _ := _entries.GetSelection()
+		//stopAppAndReturnSelected(_entries.GetCell(r, c).Text)
 		// we subtract 1 because array[] starts at 0, column at 1
 		// and another because there's a header row @ position 0
-		stopAppAndReturnSelected(hRes.HistoryEntries[r-1].Entry)
+		stopAppAndReturnSelected(_hRes.HistoryEntries[r-1].Entry)
 	case tcell.KeyEsc:
-		app.Stop()
+		_app.Stop()
 	}
 
 	return key

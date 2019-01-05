@@ -30,7 +30,7 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 	// nice to have cron jobs inside your executable
 	err = _cronTab.AddFunc("*/60 * * * * *", updater)
 	if err != nil {
-		_log.Infof("Unable to initialize CRON subsystemt.")
+		_log.Fatalf("Unable to initialize CRON subsystem")
 		os.Exit(-1)
 	}
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	_ "strings"
 	"time"
@@ -33,29 +32,10 @@ func cmdPrompt(cmd *cobra.Command, args []string) {
 
 	initLogs(false)
 
-	var err error
+	_config = mustGetConfig()
 
-	_config, err = mustGetConfig()
-	if err != nil {
-		_log.Infof("Config file is missing, unable to create dafault πconfig file.")
-		os.Exit(-1)
-	}
-
-	_config, err = readConfig()
-	if err != nil {
-		_log.Infof("Unable to read from a config file.")
-		os.Exit(-1)
-	}
-
-	err = initNATSClient()
-	if err != nil {
-		os.Exit(-1)
-	}
-
-	err = initNATSCloudClient()
-	if err != nil {
-		os.Exit(-1)
-	}
+	//mustInitNATSClient()
+	mustInitNATSCloudClient()
 
 	terminalPrompt()
 }

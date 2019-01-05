@@ -27,7 +27,7 @@ func initLogs(verbose bool) {
 	}
 }
 
-func initNATSServer() {
+func mustInitNATSServer() {
 	// embedded NATS server πconfig & startup
 	// Create the gntsd with default options (empty type)
 	var opts = gnatsd.Options{}
@@ -40,48 +40,45 @@ func initNATSServer() {
 	go gnatsd.Run(s)
 }
 
-func initNATSClient() error {
+func mustInitNATSClient() {
 	//NATS client πconfig & startup
 	NATSConnection, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
-		_log.Infof("Unable to establish connection with local server. Is sherpa daemon running?")
-		return err
+		_log.Fatalf("Unable to establish connection with local server. Is sherpa daemon running?")
+		os.Exit(-1)
 	}
 
 	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
 	if err != nil {
-		_log.Infof("Unable to encode connection with local server.")
-		return err
+		_log.Fatalf("Unable to encode connection with local server.")
+		os.Exit(-1)
 	}
 
 	if !NATSConnection.IsConnected() {
-		_log.Infof("Client non connected.")
-		newErr := new(error)
-		return newErr
+		_log.Fatalf("Client non connected.")
+		os.Exit(-1)
 	}
 
 	_ec = NATSEncodedConnection
-	return nil
 }
 
-func initNATSCloudClient() error {
+func mustInitNATSCloudClient() error {
 	//NATS client πconfig & startup
 	NATSConnection, err := nats.Connect("nats://csherpa.avero.it:4222")
 	if err != nil {
-		_log.Infof("Unable to establish connection with the cloud server")
-		return err
+		_log.Fatalf("Unable to establish connection with the cloud server")
+		os.Exit(-1)
 	}
 
 	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
 	if err != nil {
-		_log.Infof("Unable to create and encoded coccection with the cloud server")
-		return err
+		_log.Fatalf("Unable to create and encoded coccection with the cloud server")
+		os.Exit(-1)
 	}
 
 	if !NATSConnection.IsConnected() {
-		_log.Infof("Client non connected.")
-		newErr := new(error)
-		return newErr
+		_log.Fatalf("Client non connected.")
+		os.Exit(-1)
 	}
 
 	_cec = NATSEncodedConnection
@@ -89,7 +86,7 @@ func initNATSCloudClient() error {
 }
 
 func readConfig() (Config, error) {
-	_log.Debugf("Reading πconfig file")
+	_log.Debugf("Reading config file")
 
 	var err error
 
@@ -100,32 +97,32 @@ func readConfig() (Config, error) {
 
 	file, err := os.Open(configFile)
 	if err != nil {
-		// return a zeroed πconfig and an error
+		// return a zeroed config and an error
 		return config, err
 	}
 
 	// and pass is to a the YAML unmarshaler
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		// return a zeroed πconfig and an error
+		// return a zeroed config and an error
 		return config, err
 	}
 
 	err = yaml.Unmarshal(bytes, &config)
 	if err != nil {
-		// return a zeroed πconfig and an error
+		// return a zeroed config and an error
 		return config, err
 	}
 
-	_log.Debugf("Unmarshaled πconfig=%+v", config)
+	_log.Debugf("Unmarshaled config=%+v", config)
 
 	defer file.Close()
 
 	return config, nil
 }
 
-func writeConfig(config Config) (Config, error) {
-	_log.Debugf("Writing πconfig file")
+func mustWriteConfig(config Config) {
+	_log.Debugf("Writing config file")
 
 	var err error
 
@@ -135,70 +132,63 @@ func writeConfig(config Config) (Config, error) {
 
 	file, err := os.OpenFile(configFile, os.O_RDWR, 0666)
 	if err != nil {
-		// return  πconfig and an error
-		_log.Debugf("failed to open")
-		return config, err
+		_log.Fatalf("failed to open")
+		os.Exit(-1)
 	}
 
 	// truncate the file
 	err = file.Truncate(0)
 	if err != nil {
-		// return  πconfig and an error
-		_log.Debugf("failed to truncate")
-		return config, err
+		_log.Fatalf("failed to truncate")
+		os.Exit(-1)
 	}
 
 	// seek from the beginning
 	_, err = file.Seek(0, 0)
 	if err != nil {
-		// return  πconfig and an error
-		_log.Debugf("failed to seek")
-		return config, err
+		_log.Fatalf("failed to seek")
+		os.Exit(-1)
 	}
 
-	// marshal a πconfig type into a []byte
+	// marshal a config type into a []byte
 	bytes, err := yaml.Marshal(config)
 	if err != nil {
-		// return a zeroed πconfig and an error
-		_log.Debugf("failed to yaml.Marshal")
-		return config, err
+		_log.Fatalf("failed to yaml.Marshal")
+		os.Exit(-1)
 	}
 
 	// write the []byte to file
 	_, err = file.Write(bytes)
 	if err != nil {
-		// return a zeroed πconfig and an error
-		_log.Debugf("failed to write")
-		return config, err
+		// return a zeroed config and an error
+		_log.Fatalf("failed to write")
+		os.Exit(-1)
 	}
 
 	err = file.Close()
 	if err != nil {
-		// return a zeroed πconfig and an error
+		// return a zeroed config and an error
 		_log.Debugf("failed to close")
-
-		return config, err
+		os.Exit(-1)
 	}
-
-	return config, nil
 }
 
-func mustGetConfig() (Config, error) {
+func mustGetConfig() Config {
 	_log.Debugf("Checking existance of a valid config file")
 	var err error
 
 	config, err := readConfig()
 	if err != nil {
 		_log.Debugf("unable to read config file")
-		config, err = writeConfig(config)
+		mustWriteConfig(config)
 		if err != nil {
 			_log.Debugf("unable to create config file")
-			return config, err
+			return config
 		} else {
-			// return zeroed πconfig in any case
-			return config, err
+			// return zeroed config in any case
+			return config
 		}
 	}
 
-	return config, err
+	return config
 }

@@ -18,23 +18,20 @@ func account(cmd *cobra.Command, args []string) {
 
 func accountLogin(cmd *cobra.Command, args []string) {
 
+	var err error
+
 	_command = "account/login"
 
-	initLogs(true)
+	initLogs(false)
 
-	var err error
-	_config, err = mustGetConfig()
-	if err != nil {
-		_log.Debugf("unable to either read a config or create a default one")
-		os.Exit(-1)
-	}
+	_config := mustGetConfig()
 
-	initNATSClient()
-	initNATSCloudClient()
+	//mustInitNATSClient()
+	mustInitNATSCloudClient()
 
-	_log.Infof("reached 'sherpa account login'")
+	_log.Debugf("reached 'sherpa account login'")
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter account email: ")
+	fmt.Println("Enter account email: ")
 	email, err := reader.ReadString('\n')
 	if err != nil {
 		_log.Fatalf("Error reading from stdin")
@@ -69,11 +66,7 @@ func accountLogin(cmd *cobra.Command, args []string) {
 			_config.APIKey = alRes.APIKey
 			_log.Debugf("received APIKey=%s", alRes.APIKey)
 
-			_, err = writeConfig(_config)
-			if err != nil {
-				_log.Debugf("failed to update config file")
-				_log.Debugf("err=%+v", err)
-			}
+			mustWriteConfig(_config)
 		} else {
 			_log.Debugf("csherpa said: wrong email or password")
 		}
@@ -86,8 +79,8 @@ func accountCreate(cmd *cobra.Command, args []string) {
 
 	initLogs(true)
 
-	initNATSClient()
-	initNATSCloudClient()
+	mustInitNATSClient()
+	mustInitNATSCloudClient()
 
 	_log.Infof("reached 'sherpa account create'")
 	reader := bufio.NewReader(os.Stdin)

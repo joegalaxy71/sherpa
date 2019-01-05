@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/inconshreveable/go-update"
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/inconshreveable/go-update"
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 var configFile string
@@ -20,31 +21,11 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 
 	initLogs(_verbose)
 
-	_config, err = mustGetConfig()
-	if err != nil {
-		_log.Infof("Config file is missing, unable to create dafault πconfig file.")
-		os.Exit(-1)
-	}
+	_config = mustGetConfig()
 
-	_config, err = readConfig()
-	if err != nil {
-		_log.Infof("Unable to read from a πconfig file.")
-		os.Exit(-1)
-	}
-
-	initNATSServer()
-
-	err = initNATSClient()
-	if err != nil {
-		_log.Infof("Unable to initialize NATS client.")
-		os.Exit(-1)
-	}
-
-	err = initNATSCloudClient()
-	if err != nil {
-		_log.Infof("Unable to initialize NATS cloud client.")
-		os.Exit(-1)
-	}
+	mustInitNATSServer()
+	mustInitNATSClient()
+	mustInitNATSCloudClient()
 
 	// nice to have cron jobs inside your executable
 	err = _cronTab.AddFunc("*/60 * * * * *", updater)
@@ -72,7 +53,7 @@ func cmdDaemonize(cmd *cobra.Command, args []string) {
 
 func initMicroServer(us microServer) error {
 
-	//initNATSClient()
+	//mustInitNATSClient()
 
 	err := us.init()
 	if err == nil {

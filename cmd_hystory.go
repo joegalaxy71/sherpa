@@ -63,18 +63,25 @@ func cmdHistory(cmd *cobra.Command, args []string) {
 
 	_config, err = mustGetConfig()
 	if err != nil {
-		_log.Infof("Config file is missing, unable to create dafault πconfig file.")
+		_log.Infof("Config file is missing, unable to create dafault config file.")
 		os.Exit(-1)
 	}
 
 	_config, err = readConfig()
 	if err != nil {
-		_log.Infof("Unable to read from a πconfig file.")
+		_log.Infof("Unable to read from a config file.")
 		os.Exit(-1)
 	}
 
-	initNATSClient()
-	initNATSCloudClient()
+	err = initNATSClient()
+	if err != nil {
+		os.Exit(-1)
+	}
+
+	err = initNATSCloudClient()
+	if err != nil {
+		os.Exit(-1)
+	}
 
 	terminalHistory()
 }

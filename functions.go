@@ -56,7 +56,8 @@ func initNATSClient() error {
 
 	if !NATSConnection.IsConnected() {
 		_log.Infof("Client non connected.")
-		return err
+		newErr := new(error)
+		return newErr
 	}
 
 	_ec = NATSEncodedConnection
@@ -79,7 +80,8 @@ func initNATSCloudClient() error {
 
 	if !NATSConnection.IsConnected() {
 		_log.Infof("Client non connected.")
-		return err
+		newErr := new(error)
+		return newErr
 	}
 
 	_cec = NATSEncodedConnection

@@ -47,8 +47,15 @@ func cmdPrompt(cmd *cobra.Command, args []string) {
 		os.Exit(-1)
 	}
 
-	initNATSClient()
-	initNATSCloudClient()
+	err = initNATSClient()
+	if err != nil {
+		os.Exit(-1)
+	}
+
+	err = initNATSCloudClient()
+	if err != nil {
+		os.Exit(-1)
+	}
 
 	terminalPrompt()
 }

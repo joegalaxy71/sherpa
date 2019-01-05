@@ -23,9 +23,9 @@ import (
 	//"github.com/kr/pty"
 )
 
-var queryField *tview.InputField
-var prompts *tview.Table
-var pRes promptResults
+var _queryField *tview.InputField
+var _prompts *tview.Table
+var _pRes promptResults
 
 func cmdPrompt(cmd *cobra.Command, args []string) {
 
@@ -61,40 +61,40 @@ func cmdPrompt(cmd *cobra.Command, args []string) {
 }
 
 func terminalPrompt() {
-	app = tview.NewApplication()
+	_app = tview.NewApplication()
 
 	// text (separator)
 	help := tview.NewTextView().SetDynamicColors(true)
 	fmt.Fprintf(help, "[white]sherpa [red]prompt [gray] <<Set your prompt whith ease>> ^h = help")
 
 	//inputfield (history incremental partial match prompt)
-	queryField = tview.NewInputField().SetLabel("[white]type prompt name or tag").SetChangedFunc(updatePromptList)
-	queryField.SetInputCapture(interceptQueryField)
-	queryField.SetBorder(true)
+	_queryField = tview.NewInputField().SetLabel("[white]type prompt name or tag").SetChangedFunc(updatePromptList)
+	_queryField.SetInputCapture(interceptQueryField)
+	_queryField.SetBorder(true)
 
 	// table (history list)
-	prompts = tview.NewTable().SetBorders(false).SetSelectable(true, false)
-	prompts.SetCell(0, 0, tview.NewTableCell("refine prompts by name or tag...").SetAlign(tview.AlignLeft))
-	prompts.SetInputCapture(interceptPromptTable).SetBorder(true)
+	_prompts = tview.NewTable().SetBorders(false).SetSelectable(true, false)
+	_prompts.SetCell(0, 0, tview.NewTableCell("refine _prompts by name or tag...").SetAlign(tview.AlignLeft))
+	_prompts.SetInputCapture(interceptPromptTable).SetBorder(true)
 
-	// modal for help
-	modal = tview.NewModal().
+	// _modal for help
+	_modal = tview.NewModal().
 		SetText("Use TAB to switch between the panes, ENTER to paste prompt definition on terminal, ESC to exit").
 		AddButtons([]string{"Ok"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			if buttonLabel == "Ok" {
-				app.SetRoot(flex, true)
+				_app.SetRoot(_flex, true)
 			}
 		})
 
-	// flex
-	flex = tview.NewFlex().SetDirection(tview.FlexRow).
+	// _flex
+	_flex = tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(help, 1, 1, false).
-		AddItem(queryField, 3, 1, true).
-		AddItem(prompts, 0, 6, false)
+		AddItem(_queryField, 3, 1, true).
+		AddItem(_prompts, 0, 6, false)
 
-	// run flex
-	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
+	// run _flex
+	if err := _app.SetRoot(_flex, true).SetFocus(_flex).Run(); err != nil {
 		panic(err)
 	}
 
@@ -106,27 +106,27 @@ func updatePromptList(changed string) {
 	pq.Query = changed
 	pq.APIKey = _config.APIKey
 
-	err := _cec.Request("prompt-req", pq, &pRes, 1000*time.Millisecond)
+	err := _cec.Request("prompt-req", pq, &_pRes, 1000*time.Millisecond)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 	} else {
 		// delete all entries
-		prompts.Clear()
+		_prompts.Clear()
 
 		// add header row
-		prompts.SetCell(0, 0, tview.NewTableCell("[white]NAME").SetAlign(tview.AlignLeft).SetSelectable(false))
-		prompts.SetCell(0, 1, tview.NewTableCell("[white]TAGS").SetAlign(tview.AlignCenter).SetSelectable(false))
-		prompts.SetCell(0, 2, tview.NewTableCell("[white]SAMPLE").SetAlign(tview.AlignRight).SetSelectable(false))
+		_prompts.SetCell(0, 0, tview.NewTableCell("[white]NAME").SetAlign(tview.AlignLeft).SetSelectable(false))
+		_prompts.SetCell(0, 1, tview.NewTableCell("[white]TAGS").SetAlign(tview.AlignCenter).SetSelectable(false))
+		_prompts.SetCell(0, 2, tview.NewTableCell("[white]SAMPLE").SetAlign(tview.AlignRight).SetSelectable(false))
 
-		for i, prompt := range pRes.PromptEntries {
+		for i, prompt := range _pRes.PromptEntries {
 			colorized := colorizePrompt(prompt.Name, pq.Query)
-			prompts.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
-			prompts.SetCell(i+1, 1, tview.NewTableCell("[red]"+prompt.Tag).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
-			prompts.SetCell(i+1, 2, tview.NewTableCell("[red]"+prompt.Preview).SetAlign(tview.AlignRight))
+			_prompts.SetCell(i+1, 0, tview.NewTableCell(colorized).SetAlign(tview.AlignLeft))
+			_prompts.SetCell(i+1, 1, tview.NewTableCell("[red]"+prompt.Tag).SetAlign(tview.AlignCenter).SetTextColor(tcell.ColorGray))
+			_prompts.SetCell(i+1, 2, tview.NewTableCell("[red]"+prompt.Preview).SetAlign(tview.AlignRight))
 			//_log.Debugf("i=%s", i)
 		}
 	}
-	app.Draw()
+	_app.Draw()
 }
 
 func colorizePrompt(entry, req string) string {
@@ -136,7 +136,7 @@ func colorizePrompt(entry, req string) string {
 }
 
 func stopAppAndReturnSelectedPrompt(selected string) {
-	app.Stop()
+	_app.Stop()
 
 	//C.echo_off()
 
@@ -156,17 +156,17 @@ func interceptQueryField(key *tcell.EventKey) *tcell.EventKey {
 	//_log.Debug("reached tabToSwitch")
 	switch key.Key() {
 	case tcell.KeyCtrlH:
-		app.SetRoot(modal, false)
+		_app.SetRoot(_modal, false)
 	case tcell.KeyTAB:
-		app.SetFocus(prompts)
+		_app.SetFocus(_prompts)
 	case tcell.KeyDown:
-		app.SetFocus(prompts)
+		_app.SetFocus(_prompts)
 	case tcell.KeyBacktab:
-		app.SetFocus(prompts)
+		_app.SetFocus(_prompts)
 	case tcell.KeyEnter:
-		stopAppAndReturnSelectedPrompt(queryField.GetText())
+		stopAppAndReturnSelectedPrompt(_queryField.GetText())
 	case tcell.KeyEsc:
-		app.Stop()
+		_app.Stop()
 	}
 	return key
 }
@@ -175,19 +175,19 @@ func interceptPromptTable(key *tcell.EventKey) *tcell.EventKey {
 	//_log.Debug("reached interceptTable")
 	switch key.Key() {
 	case tcell.KeyCtrlH:
-		app.SetRoot(modal, false)
+		_app.SetRoot(_modal, false)
 	case tcell.KeyTAB:
-		app.SetFocus(queryField)
+		_app.SetFocus(_queryField)
 	case tcell.KeyBacktab:
-		app.SetFocus(queryField)
+		_app.SetFocus(_queryField)
 	case tcell.KeyEnter:
-		r, _ := prompts.GetSelection()
+		r, _ := _prompts.GetSelection()
 		//stopAppAndReturnSelected(prompt.GetCell(r, c).Text)
 		// we subtract 1 because array[] starts at 0, column at 1
 		// and another because there's a header row @ position 0
-		stopAppAndReturnSelected(pRes.PromptEntries[r-1].Sequence)
+		stopAppAndReturnSelected(_pRes.PromptEntries[r-1].Sequence)
 	case tcell.KeyEsc:
-		app.Stop()
+		_app.Stop()
 	}
 
 	return key

@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"time"
 
 	gnatsd "github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/nats"
@@ -72,7 +73,7 @@ func mustInitNATSCloudClient() error {
 
 	NATSEncodedConnection, err := nats.NewEncodedConn(NATSConnection, nats.GOB_ENCODER)
 	if err != nil {
-		_log.Fatalf("Unable to create and encoded coccection with the cloud server")
+		_log.Fatalf("Unable to create and encoded connection with the cloud server")
 		os.Exit(-1)
 	}
 
@@ -132,28 +133,28 @@ func mustWriteConfig(config Config) {
 
 	file, err := os.OpenFile(configFile, os.O_RDWR, 0666)
 	if err != nil {
-		_log.Fatalf("failed to open")
+		_log.Fatalf("failed to open config file")
 		os.Exit(-1)
 	}
 
 	// truncate the file
 	err = file.Truncate(0)
 	if err != nil {
-		_log.Fatalf("failed to truncate")
+		_log.Fatalf("failed to truncate config file")
 		os.Exit(-1)
 	}
 
 	// seek from the beginning
 	_, err = file.Seek(0, 0)
 	if err != nil {
-		_log.Fatalf("failed to seek")
+		_log.Fatalf("failed to seek config file")
 		os.Exit(-1)
 	}
 
 	// marshal a config type into a []byte
 	bytes, err := yaml.Marshal(config)
 	if err != nil {
-		_log.Fatalf("failed to yaml.Marshal")
+		_log.Fatalf("failed to yaml.Marshal config file")
 		os.Exit(-1)
 	}
 
@@ -161,14 +162,14 @@ func mustWriteConfig(config Config) {
 	_, err = file.Write(bytes)
 	if err != nil {
 		// return a zeroed config and an error
-		_log.Fatalf("failed to write")
+		_log.Fatalf("failed to write config file")
 		os.Exit(-1)
 	}
 
 	err = file.Close()
 	if err != nil {
 		// return a zeroed config and an error
-		_log.Debugf("failed to close")
+		_log.Debugf("failed to close config file")
 		os.Exit(-1)
 	}
 }
@@ -179,16 +180,32 @@ func mustGetConfig() Config {
 
 	config, err := readConfig()
 	if err != nil {
-		_log.Debugf("unable to read config file")
+		_log.Debugf("unable to read config file, force writing a new, empty one")
 		mustWriteConfig(config)
-		if err != nil {
-			_log.Debugf("unable to create config file")
-			return config
-		} else {
-			// return zeroed config in any case
-			return config
-		}
 	}
 
 	return config
+}
+
+func mustVerifyConfig(config Config) {
+	// asks csherpa if the config is valid, or fails, logs and exit
+	_log.Debugf("Checking validity of the APIKey")
+
+	// Requests
+	var apiReq APICheckReq
+	var apiRes APICheckRes
+	apiReq.APIKey = config.APIKey
+
+	err := _cec.Request("APICheck-req", apiReq, &apiRes, 1000*time.Millisecond)
+	if err != nil {
+		_log.Fatalf("Request to che cloud service failed: %v\n", err)
+		os.Exit(-1)
+	} else {
+		if apiRes.Valid == false {
+			_log.Fatalf("Invalid APIKey")
+			os.Exit(-1)
+		} else {
+			_log.Debugf("Valid APIKey")
+		}
+	}
 }

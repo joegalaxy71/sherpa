@@ -63,6 +63,8 @@ func cmdHistory(cmd *cobra.Command, args []string) {
 	mustInitNATSClient()
 	mustInitNATSCloudClient()
 
+	mustVerifyConfig(_config)
+
 	terminalHistory()
 }
 

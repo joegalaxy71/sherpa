@@ -10,6 +10,16 @@ type response struct {
 	Err error
 }
 
+// VERIFY
+
+type APICheckReq struct {
+	APIKey string
+}
+
+type APICheckRes struct {
+	Valid bool
+}
+
 // HISTORY
 
 type historyQuery struct {
